@@ -180,5 +180,61 @@ pole_pracownik_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_pracownik = ttk.Button(ramka_formularza_pracownik, text="Dodaj", command=dodaj_pracownika)
 przycisk_dodaj_pracownik.grid(row=4, column=1, columnspan=2, pady=10)
 
+# --- Zakładka Klienci --- #
+
+zakladka_klienci = ttk.Frame(zakladki)
+zakladki.add(zakladka_klienci, text="Klienci")
+
+ramka_klient_filtr = ttk.Frame(zakladka_klienci)
+ramka_klient_filtr.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+ttk.Label(ramka_klient_filtr, text="Wybierz kino:").grid(row=0, column=0, sticky="w")
+lista_rozwijalna_klient_kino = ttk.Combobox(ramka_klient_filtr, state="readonly", width=20)
+lista_rozwijalna_klient_kino.grid(row=0, column=1, padx=5)
+lista_rozwijalna_klient_kino['values'] = ["Wszystkie"]
+lista_rozwijalna_klient_kino.set("Wszystkie")
+lista_rozwijalna_klient_kino.bind("<<ComboboxSelected>>", lambda e: odswiez_liste_klientow())
+
+ramka_listy_klient = ttk.Frame(zakladka_klienci)
+ramka_listy_klient.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
+ttk.Label(ramka_listy_klient, text="Lista klientów:").pack()
+lista_klientow = tk.Listbox(ramka_listy_klient, width=60, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
+lista_klientow.pack()
+lista_klientow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_klienta)
+
+ramka_przyciskow_klient = ttk.Frame(ramka_listy_klient)
+ramka_przyciskow_klient.pack(pady=5)
+
+przycisk_edytuj_klient = ttk.Button(ramka_przyciskow_klient, text="Edytuj", command=edytuj_klienta)
+przycisk_edytuj_klient.grid(row=0, column=0, padx=5)
+
+przycisk_usun_klient = ttk.Button(ramka_przyciskow_klient, text="Usuń", command=usun_klienta)
+przycisk_usun_klient.grid(row=0, column=1, padx=5)
+
+etykieta_szczegoly_klienta = ttk.Label(ramka_listy_klient, text="Szczegóły klienta:")
+etykieta_szczegoly_klienta.pack(pady=10)
+
+informacje_o_wybranym_kliencie = ttk.Label(ramka_listy_klient, text="Nie wybrano klienta.", anchor="w", justify="left")
+informacje_o_wybranym_kliencie.pack(pady=5, fill="both", expand=True)
+
+ramka_formularza_klient = ttk.Frame(zakladka_klienci)
+ramka_formularza_klient.grid(row=1, column=1, padx=10, pady=5, sticky="n")
+ttk.Label(ramka_formularza_klient, text="Dodaj/Edytuj kienta:").grid(row=0, column=1, columnspan=2, pady=5)
+
+ttk.Label(ramka_formularza_klient, text="Imię:").grid(row=1, column=0, sticky="e")
+pole_klient_imie = ttk.Entry(ramka_formularza_klient, width=33)
+pole_klient_imie.grid(row=1, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_klient, text="Nazwisko:").grid(row=2, column=0, sticky="e")
+pole_klient_nazwisko = ttk.Entry(ramka_formularza_klient, width=33)
+pole_klient_nazwisko.grid(row=2, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_klient, text="Lokalizacja:").grid(row=3, column=0, sticky="e")
+pole_klient_lokalizacja = ttk.Entry(ramka_formularza_klient, width=33)
+pole_klient_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
+
+przycisk_dodaj_klient = ttk.Button(ramka_formularza_klient, text="Dodaj", command=dodaj_klienta)
+przycisk_dodaj_klient.grid(row=4, column=1, columnspan=2, pady=10)
+
+
 
 root.mainloop()

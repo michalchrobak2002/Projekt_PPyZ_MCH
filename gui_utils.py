@@ -50,3 +50,20 @@ def usun_pracownika():
 
 def dodaj_pracownika():
     pass
+
+# --- Zakładka Klienci --- #
+
+def odswiez_liste_klientow():
+    pass
+
+def pokaz_szczegoly_klienta():
+    pass
+
+def edytuj_klienta():
+    pass
+
+def usun_klienta():
+    pass
+
+def dodaj_klienta():
+    pass
