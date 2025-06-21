@@ -33,3 +33,20 @@ def usun_seans():
 
 def dodaj_seans():
     pass
+
+# --- Zakładka Pracownicy --- #
+
+def odswiez_liste_pracownikow():
+    pass
+
+def pokaz_szczegoly_pracownika():
+    pass
+
+def edytuj_pracownika():
+    pass
+
+def usun_pracownika():
+    pass
+
+def dodaj_pracownika():
+    pass

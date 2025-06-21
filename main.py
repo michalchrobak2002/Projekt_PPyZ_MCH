@@ -124,4 +124,61 @@ pole_seans_czas_trwania.grid(row=4, column=1, padx=2, pady=5)
 przycisk_dodaj_seans = ttk.Button(ramka_formularza_seans, text="Dodaj", command=dodaj_seans)
 przycisk_dodaj_seans.grid(row=5, column=1, columnspan=2, pady=10)
 
+# --- Zakładka Pracownicy --- #
+
+zakladka_pracownicy = ttk.Frame(zakladki)
+zakladki.add(zakladka_pracownicy, text="Pracownicy")
+
+ramka_pracownik_filtr = ttk.Frame(zakladka_pracownicy)
+ramka_pracownik_filtr.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+ttk.Label(ramka_pracownik_filtr, text="Wybierz kino:").grid(row=0, column=0, sticky="w")
+lista_rozwijalna_pracownik_kino = ttk.Combobox(ramka_pracownik_filtr, state="readonly", width=20)
+lista_rozwijalna_pracownik_kino.grid(row=0, column=1, padx=5)
+lista_rozwijalna_pracownik_kino['values'] = ["Wszystkie"]
+lista_rozwijalna_pracownik_kino.set("Wszystkie")
+lista_rozwijalna_pracownik_kino.bind("<<ComboboxSelected>>", lambda e: odswiez_liste_pracownikow())
+
+ramka_listy_pracownik = ttk.Frame(zakladka_pracownicy)
+ramka_listy_pracownik.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
+ttk.Label(ramka_listy_pracownik, text="Lista pracowników:").pack()
+lista_pracownikow = tk.Listbox(ramka_listy_pracownik, width=60,height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
+lista_pracownikow.pack()
+lista_pracownikow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_pracownika)
+
+ramka_przyciskow_pracownik = ttk.Frame(ramka_listy_pracownik)
+ramka_przyciskow_pracownik.pack(pady=5)
+
+przycisk_edytuj_pracownik = ttk.Button(ramka_przyciskow_pracownik, text="Edytuj", command=edytuj_pracownika)
+przycisk_edytuj_pracownik.grid(row=0, column=0, padx=5)
+
+przycisk_usun_pracownik = ttk.Button(ramka_przyciskow_pracownik, text="Usuń", command=usun_pracownika)
+przycisk_usun_pracownik.grid(row=0, column=1, padx=5)
+
+etykieta_szczegoly_pracownika = ttk.Label(ramka_listy_pracownik, text="Szczegóły pracownika:")
+etykieta_szczegoly_pracownika.pack(pady=10)
+
+informacje_o_wybranym_pracowniku = ttk.Label(ramka_listy_pracownik, text="Nie wybrano pracownika.", anchor="w",justify="left")
+informacje_o_wybranym_pracowniku.pack(pady=5, fill="both", expand=True)
+
+ramka_formularza_pracownik = ttk.Frame(zakladka_pracownicy)
+ramka_formularza_pracownik.grid(row=1, column=1, padx=10, pady=5, sticky="n")
+ttk.Label(ramka_formularza_pracownik, text="Dodaj/Edytuj pracownika:").grid(row=0, column=1, columnspan=2, pady=5)
+
+ttk.Label(ramka_formularza_pracownik, text="Imię:").grid(row=1, column=0, sticky="e")
+pole_pracownik_imie = ttk.Entry(ramka_formularza_pracownik, width=33)
+pole_pracownik_imie.grid(row=1, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_pracownik, text="Nazwisko:").grid(row=2, column=0, sticky="e")
+pole_pracownik_nazwisko = ttk.Entry(ramka_formularza_pracownik, width=33)
+pole_pracownik_nazwisko.grid(row=2, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_pracownik, text="Lokalizacja:").grid(row=3, column=0, sticky="e")
+pole_pracownik_lokalizacja = ttk.Entry(ramka_formularza_pracownik, width=33)
+pole_pracownik_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
+
+przycisk_dodaj_pracownik = ttk.Button(ramka_formularza_pracownik, text="Dodaj", command=dodaj_pracownika)
+przycisk_dodaj_pracownik.grid(row=4, column=1, columnspan=2, pady=10)
+
+
 root.mainloop()
