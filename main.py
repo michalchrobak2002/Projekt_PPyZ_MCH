@@ -29,7 +29,7 @@ ramka_listy_kin.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
 ttk.Label(ramka_listy_kin, text="Lista kin:").pack()
 lista_kin = tk.Listbox(ramka_listy_kin, width=60, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
 lista_kin.pack()
-lista_kin.bind("<<ListboxSelect>>", pokaz_szczegoly_kina)
+lista_kin.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_kina)
 
 ramka_przyciskow_kin = ttk.Frame(ramka_listy_kin)
 ramka_przyciskow_kin.pack(pady=5)
@@ -65,5 +65,63 @@ pole_kino_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_kina = ttk.Button(ramka_formularza_kin, text="Dodaj", command=dodaj_kino)
 przycisk_dodaj_kina.grid(row=4, column=1, columnspan=2, pady=10)
 
+# --- Zakładka Seanse --- #
+
+zakladka_seanse = ttk.Frame(zakladki)
+zakladki.add(zakladka_seanse, text="Seanse")
+
+ramka_seans_filtr = ttk.Frame(zakladka_seanse)
+ramka_seans_filtr.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+ttk.Label(ramka_seans_filtr, text="Wybierz kino:").grid(row=0, column=0, sticky="w")
+lista_rozwijalna_seans_kino = ttk.Combobox(ramka_seans_filtr, state="readonly", width=20)
+lista_rozwijalna_seans_kino.grid(row=0, column=1, padx=5)
+lista_rozwijalna_seans_kino['values'] = ["Wszystkie"]
+lista_rozwijalna_seans_kino.set("Wszystkie")
+lista_rozwijalna_seans_kino.bind("<<ComboboxSelected>>", lambda e: odswiez_liste_seansow())
+
+ramka_listy_seans = ttk.Frame(zakladka_seanse)
+ramka_listy_seans.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
+ttk.Label(ramka_listy_seans, text="Lista seansów:").pack()
+lista_seansow = tk.Listbox(ramka_listy_seans, width=59, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
+lista_seansow.pack()
+lista_seansow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_seansu)
+
+ramka_przyciskow_seans = ttk.Frame(ramka_listy_seans)
+ramka_przyciskow_seans.pack(pady=5)
+
+przycisk_edytuj_seans = ttk.Button(ramka_przyciskow_seans, text="Edytuj", command=edytuj_seans)
+przycisk_edytuj_seans.grid(row=0, column=0, padx=5)
+
+przycisk_usun_seans = ttk.Button(ramka_przyciskow_seans, text="Usuń", command=usun_seans)
+przycisk_usun_seans.grid(row=0, column=1, padx=5)
+
+etykieta_szczegoly_seansu = ttk.Label(ramka_listy_seans, text="Szczegóły seansu:")
+etykieta_szczegoly_seansu.pack(pady=10)
+
+informacje_o_wybranym_seansie = ttk.Label(ramka_listy_seans, text="Nie wybrano seansu.", anchor="w", justify="left")
+informacje_o_wybranym_seansie.pack(pady=5, fill="both", expand=True)
+
+ramka_formularza_seans = ttk.Frame(zakladka_seanse)
+ramka_formularza_seans.grid(row=1, column=1, padx=10, pady=5, sticky="n")
+ttk.Label(ramka_formularza_seans, text="Dodaj/Edytuj seans:").grid(row=0, column=1, columnspan=2, pady=5)
+
+ttk.Label(ramka_formularza_seans, text="Tytuł:").grid(row=1, column=0, sticky="e")
+pole_seans_tytul = ttk.Entry(ramka_formularza_seans, width=33)
+pole_seans_tytul.grid(row=1, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_seans, text="Data:").grid(row=2, column=0, sticky="e")
+pole_seans_data = ttk.Entry(ramka_formularza_seans, width=33)
+pole_seans_data.grid(row=2, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_seans, text="Godzina:").grid(row=3, column=0, sticky="e")
+pole_seans_godzina = ttk.Entry(ramka_formularza_seans, width=33)
+pole_seans_godzina.grid(row=3, column=1, padx=2, pady=5)
+
+ttk.Label(ramka_formularza_seans, text="Czas trwania:").grid(row=4, column=0, sticky="e")
+pole_seans_czas_trwania = ttk.Entry(ramka_formularza_seans, width=33)
+pole_seans_czas_trwania.grid(row=4, column=1, padx=2, pady=5)
+
+przycisk_dodaj_seans = ttk.Button(ramka_formularza_seans, text="Dodaj", command=dodaj_seans)
+przycisk_dodaj_seans.grid(row=5, column=1, columnspan=2, pady=10)
 
 root.mainloop()

@@ -17,3 +17,19 @@ def usun_kino():
 def dodaj_kino():
     pass
 
+# --- Zakładka Seanse --- #
+
+def odswiez_liste_seansow():
+    pass
+
+def pokaz_szczegoly_seansu():
+    pass
+
+def edytuj_seans():
+    pass
+
+def usun_seans():
+    pass
+
+def dodaj_seans():
+    pass
