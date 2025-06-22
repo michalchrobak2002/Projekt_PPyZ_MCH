@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import tkintermapview
 
 from gui_utils import *
 
@@ -234,6 +235,86 @@ pole_klient_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 
 przycisk_dodaj_klient = ttk.Button(ramka_formularza_klient, text="Dodaj", command=dodaj_klienta)
 przycisk_dodaj_klient.grid(row=4, column=1, columnspan=2, pady=10)
+
+# --- Zakładka Mapy --- #
+
+zakladka_mapy = ttk.Frame(zakladki)
+zakladki.add(zakladka_mapy, text="Mapa")
+
+widget_mapy = tkintermapview.TkinterMapView(zakladka_mapy, width=1100, height=630, corner_radius=0)
+widget_mapy.pack(pady=10)
+widget_mapy.set_position(52.23, 21.00)
+widget_mapy.set_zoom(6)
+root.after(100, odswiez_mape)
+
+ramka_list_rozwijalnych = ttk.Frame(zakladka_mapy)
+ramka_list_rozwijalnych.pack(pady=5)
+
+etykieta_siec = ttk.Label(ramka_list_rozwijalnych, text="Wybierz sieć kin:")
+etykieta_siec.grid(row=0, column=0, padx=5, pady=2, sticky="e")
+lista_rozwijalna_siec_mapy = ttk.Combobox(ramka_list_rozwijalnych, state="readonly", width=20)
+lista_rozwijalna_siec_mapy.grid(row=0, column=1, padx=5, pady=2, sticky="w")
+
+etykieta_kino = ttk.Label(ramka_list_rozwijalnych, text="Wybierz kino:")
+etykieta_kino.grid(row=0, column=2, padx=5, pady=2, sticky="e")
+lista_rozwijalna_kino_mapy = ttk.Combobox(ramka_list_rozwijalnych, state="readonly", width=20)
+lista_rozwijalna_kino_mapy.grid(row=0, column=3, padx=5, pady=2, sticky="w")
+
+etykieta_seans = ttk.Label(ramka_list_rozwijalnych, text="Wybierz seans:")
+etykieta_seans.grid(row=0, column=4, padx=5, pady=2, sticky="e")
+lista_rozwijalna_seans_mapy = ttk.Combobox(ramka_list_rozwijalnych, state="readonly", width=20)
+lista_rozwijalna_seans_mapy.grid(row=0, column=5, padx=5, pady=2, sticky="w")
+
+ramka_list_rozwijalnych.columnconfigure(0, weight=1)
+ramka_list_rozwijalnych.columnconfigure(6, weight=1)
+
+odswiez_liste_sieci_na_mapie()
+aktualizuj_kino_na_mapie_po_sieci()
+aktualizuj_liste_seansow_na_mapie()
+
+ramka_przyciski_mapy = ttk.Frame(zakladka_mapy)
+ramka_przyciski_mapy.pack(pady=5)
+
+# Ramki grupujące
+ramka_kina = ttk.LabelFrame(ramka_przyciski_mapy, style="Group.TLabelframe")
+ramka_kina.grid(row=0, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
+etykieta_kina = ttk.Label( ramka_przyciski_mapy, text="Operacje na kinach")
+etykieta_kina.place(in_=ramka_kina, relx=0.5, y=-7, anchor="s")
+
+ramka_seanse = ttk.LabelFrame(ramka_przyciski_mapy, style="Group.TLabelframe")
+ramka_seanse.grid(row=0, column=3, padx=5, pady=5, sticky="nsew")
+etykieta_seanse = ttk.Label( ramka_przyciski_mapy, text="Operacje na kinach")
+etykieta_seanse.place(in_=ramka_seanse, relx=0.5, y=-7, anchor="s")
+
+ramka_osoby = ttk.LabelFrame(ramka_przyciski_mapy, style="Group.TLabelframe")
+ramka_osoby.grid(row=0, column=4, columnspan=2, padx=5, pady=5, sticky="nsew")
+etykieta_osoby = ttk.Label( ramka_przyciski_mapy, text="Operacje na kinach")
+etykieta_osoby.place(in_=ramka_osoby, relx=0.46, y=-7, anchor="s")
+
+# Przyciski dla grup
+przycisk_pokaz_kina = ttk.Button(ramka_kina, text="Pokaż wszystkie kina", command=pokaz_wszystkie_kina_na_mapie, style="Map.TButton")
+przycisk_pokaz_kina.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_kina, "Wyświetla wszystkie kina na mapie")
+
+przycisk_pokaz_placowki = ttk.Button(ramka_kina, text="Pokaż placówki sieci", command=pokaz_kin_po_sieci, style="Map.TButton")
+przycisk_pokaz_placowki.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_placowki, "Wyświetla kina wybranej sieci na mapie")
+
+przycisk_pokaz_szczegoly = ttk.Button(ramka_kina, text="Pokaż szczegóły", command=pokaz_szczegoly_kina_na_mapie, style="Map.TButton")
+przycisk_pokaz_szczegoly.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_szczegoly, "Pokazuje szczegóły wybranego kina na mapie")
+
+przycisk_pokaz_kina_dla_seansu = ttk.Button(ramka_seanse, text="Pokaż kina dla seansu", command=pokaz_kina_dla_seansu, style="Map.TButton")
+przycisk_pokaz_kina_dla_seansu.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_kina_dla_seansu, "Pokazuje kina dla wybranego seansu na mapie")
+
+przycisk_pokaz_pracownikow = ttk.Button(ramka_osoby, text="Pokaż pracowników", command=pokaz_pracownikow_na_mapie, style="Map.TButton")
+przycisk_pokaz_pracownikow.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_pracownikow, "Wyświetla pracowników wybranego kina/kin na mapie")
+
+przycisk_pokaz_klientow = ttk.Button(ramka_osoby, text="Pokaż klientów", command=pokaz_klientow_na_mapie, style="Map.TButton")
+przycisk_pokaz_klientow.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_klientow, "Wyświetla klientów wybranego kina/kin na mapie")
 
 
 
