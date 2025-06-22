@@ -2,96 +2,129 @@ import tkinter as tk
 import os
 import tempfile
 
+
 # -------------------------- ZAKŁADKA KIN -------------------------- #
+
 
 def odswiez_liste_kin():
     pass
 
+
 def pokaz_szczegoly_kina():
     pass
+
 
 def edytuj_kino():
     pass
 
+
 def usun_kino():
     pass
+
 
 def dodaj_kino():
     pass
 
+
 # -------------------------- ZAKŁADKA SEANSE -------------------------- #
+
 
 def odswiez_liste_seansow():
     pass
 
+
 def pokaz_szczegoly_seansu():
     pass
+
 
 def edytuj_seans():
     pass
 
+
 def usun_seans():
     pass
+
 
 def dodaj_seans():
     pass
 
+
 # -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
+
 
 def odswiez_liste_pracownikow():
     pass
 
+
 def pokaz_szczegoly_pracownika():
     pass
+
 
 def edytuj_pracownika():
     pass
 
+
 def usun_pracownika():
+
     pass
 
 def dodaj_pracownika():
     pass
 
+
 # -------------------------- ZAKŁADKA KLIENCI -------------------------- #
+
 
 def odswiez_liste_klientow():
     pass
 
+
 def pokaz_szczegoly_klienta():
     pass
+
 
 def edytuj_klienta():
     pass
 
+
 def usun_klienta():
     pass
+
 
 def dodaj_klienta():
     pass
 
+
 # -------------------------- ZAKŁADKA MAPY -------------------------- #
+
 
 def odswiez_mape():
     pass
 
+
 def pokaz_wszystkie_kina_na_mapie():
     pass
+
 
 def pokaz_kin_po_sieci():
     pass
 
+
 def pokaz_szczegoly_kina_na_mapie():
     pass
+
 
 def pokaz_kina_dla_seansu():
     pass
 
+
 def pokaz_pracownikow_na_mapie():
     pass
 
+
 def pokaz_klientow_na_mapie():
     pass
+
 
 def podpowiedzi_przyciskow_na_mapie(widget, text):
     tooltip = tk.Toplevel(widget)
@@ -115,7 +148,9 @@ def podpowiedzi_przyciskow_na_mapie(widget, text):
     tooltip.withdraw()
     return tooltip
 
+
 #-------------------------- IKONA APLIKACJI --------------------------#
+
 
 def pobierz_sciezke_ikony():
     """ Zwraca ścieżkę do tymczasowej ikony (działa zarówno w .exe, jak i w terminalu) """
@@ -126,7 +161,7 @@ def pobierz_sciezke_ikony():
     katalog_tymczasowy = tempfile.gettempdir()
     sciezka_ikony  = os.path.join(katalog_tymczasowy, "temp_app_icon.ico")
 
-    # Sprawdź, czy plik już istnieje i jest aktualny
+    # Sprawdza, czy plik już istnieje i jest aktualny
     if not os.path.exists(sciezka_ikony ) or os.path.getsize(sciezka_ikony ) != len(ikona_w_bajtach):
         try:
             with open(sciezka_ikony , "wb") as plik_ikony:
@@ -137,12 +172,14 @@ def pobierz_sciezke_ikony():
 
     return sciezka_ikony
 
-########################################
+
 def odswiez_liste_sieci_na_mapie():
     pass
 
+
 def aktualizuj_kino_na_mapie_po_sieci():
     pass
+
 
 def aktualizuj_liste_seansow_na_mapie():
     pass

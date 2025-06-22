@@ -1,9 +1,9 @@
-import tkinter as tk
 from tkinter import ttk
 import tkintermapview
 import ctypes
 
-from gui_utils import *
+from utils.gui import *
+
 
 root = tk.Tk()
 root.title("System do zarządzania siecią kin")
@@ -16,7 +16,7 @@ sciezka_ikony  = pobierz_sciezke_ikony()
 if sciezka_ikony :
     root.iconbitmap(sciezka_ikony )
 else:
-    print("Nie udało się załadować ikony")
+    print("\nNie udało się załadować ikony")
 
 style = ttk.Style()
 style.theme_use('clam')
@@ -25,7 +25,7 @@ style.configure("TLabel", background="lightblue", foreground="black")
 style.configure("TButton", background="skyblue", foreground="black")
 style.configure("TNotebook", background="skyblue")
 style.configure("TNotebook.Tab", background="lightblue", foreground="black", padding=[5, 2])
-style.map("TNotebook.Tab", background=[("selected", "skyblue")])
+style.map("TNotebook.Tab", background=[("selected", "skyblue"), ("active", "skyblue")])
 # style.configure("TEntry", fieldbackground="lightblue", foreground="black")
 style.configure("TLabelframe", background="lightblue")
 style.configure("TLabelframe.Label", background="lightblue", foreground="black")
@@ -33,11 +33,12 @@ style.configure("Map.TButton", background="skyblue", foreground="black", padding
 style.configure("Group.TLabelframe", background="lightblue", padding=0)
 style.configure("Group.TLabelframe.Label", background="lightblue", anchor="center", padding=0)
 
-
 zakladki = ttk.Notebook(root)
 zakladki.pack(fill="both", expand=True)
 
+
 # -------------------------- ZAKŁADKA KIN -------------------------- #
+
 
 zakladka_kin = ttk.Frame(zakladki)
 zakladki.add(zakladka_kin, text="Kina")
@@ -92,7 +93,9 @@ pole_kino_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_kina = ttk.Button(ramka_formularza_kin, text="Dodaj", command=dodaj_kino)
 przycisk_dodaj_kina.grid(row=4, column=1, columnspan=2, pady=10)
 
+
 # -------------------------- ZAKŁADKA SEANSE -------------------------- #
+
 
 zakladka_seanse = ttk.Frame(zakladki)
 zakladki.add(zakladka_seanse, text="Seanse")
@@ -151,7 +154,9 @@ pole_seans_czas_trwania.grid(row=4, column=1, padx=2, pady=5)
 przycisk_dodaj_seans = ttk.Button(ramka_formularza_seans, text="Dodaj", command=dodaj_seans)
 przycisk_dodaj_seans.grid(row=5, column=1, columnspan=2, pady=10)
 
+
 # -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
+
 
 zakladka_pracownicy = ttk.Frame(zakladki)
 zakladki.add(zakladka_pracownicy, text="Pracownicy")
@@ -207,7 +212,9 @@ pole_pracownik_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_pracownik = ttk.Button(ramka_formularza_pracownik, text="Dodaj", command=dodaj_pracownika)
 przycisk_dodaj_pracownik.grid(row=4, column=1, columnspan=2, pady=10)
 
+
 # -------------------------- ZAKŁADKA KLIENCI -------------------------- #
+
 
 zakladka_klienci = ttk.Frame(zakladki)
 zakladki.add(zakladka_klienci, text="Klienci")
@@ -262,7 +269,9 @@ pole_klient_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_klient = ttk.Button(ramka_formularza_klient, text="Dodaj", command=dodaj_klienta)
 przycisk_dodaj_klient.grid(row=4, column=1, columnspan=2, pady=10)
 
+
 # -------------------------- ZAKŁADKA MAPY -------------------------- #
+
 
 zakladka_mapy = ttk.Frame(zakladki)
 zakladki.add(zakladka_mapy, text="Mapa")
