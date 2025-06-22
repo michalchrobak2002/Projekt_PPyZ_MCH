@@ -472,25 +472,139 @@ def pokaz_szczegoly_pracownika(event=None):
 
 # -------------------------- ZAKŁADKA KLIENCI -------------------------- #
 
-
 def odswiez_liste_klientow():
-    pass
+    lista_klientow.delete(0, tk.END)
+    wybrane_kino = lista_rozwijalna_klient_kino.get()
 
+    if wybrane_kino == "Wszystkie" or not wybrane_kino:
+        for indeks, klient in enumerate(klienci):
+            lista_klientow.insert(tk.END, f"{indeks + 1}. {klient.imie} {klient.nazwisko} - {klient.kino}")
+    else:
+        for indeks, klient in enumerate([k for k in klienci if k.kino == wybrane_kino]):
+            lista_klientow.insert(tk.END, f"{indeks + 1}. {klient.imie} {klient.nazwisko} - {klient.kino}")
 
-def pokaz_szczegoly_klienta():
-    pass
-
-
-def edytuj_klienta():
-    pass
-
-
-def usun_klienta():
-    pass
+#    print("\nFunkcja odswiez_liste_klientow: Lista została zaktualizowana.")
 
 
 def dodaj_klienta():
-    pass
+    imie = pole_klient_imie.get()
+    nazwisko = pole_klient_nazwisko.get()
+    lokalizacja = pole_klient_lokalizacja.get()
+    kino_wybrane = lista_rozwijalna_klient_kino.get()
+    if imie and nazwisko and lokalizacja and kino_wybrane and kino_wybrane != "Wybierz kino":
+        wsp = pobierz_wspolrzedne(lokalizacja)
+        if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
+            messagebox.showerror("Błąd", "Błędna lokalizacja, wprowadź poprawną lokalizację.")
+            return
+        nowy_klient = Klient(imie, nazwisko, kino_wybrane, lokalizacja)
+        klienci.append(nowy_klient)
+        globalna_aktualizacja()
+        pole_klient_imie.delete(0, tk.END)
+        pole_klient_nazwisko.delete(0, tk.END)
+        pole_klient_lokalizacja.delete(0, tk.END)
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla klienta (Imię, Nazwisko, Lokalizacja).")
+
+
+def usun_klienta():
+    try:
+        indeks = lista_klientow.curselection()[0]
+        wybrane_kino = lista_rozwijalna_klient_kino.get()
+
+        if wybrane_kino == "Wszystkie":
+            klient = klienci[indeks]
+        else:
+            klient = [k for k in klienci if k.kino == wybrane_kino][indeks]
+
+        klienci.remove(klient)
+        odswiez_liste_klientow()
+        globalna_aktualizacja()
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano klienta do usunięcia.")
+
+
+def edytuj_klienta():
+    try:
+        wybrane_kino = lista_rozwijalna_klient_kino.get()
+        filtrowani = [k for k in klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
+        indeks = lista_klientow.curselection()[0]
+        klient = filtrowani[indeks]
+        pole_klient_imie.delete(0, tk.END)
+        pole_klient_imie.insert(0, klient.imie)
+        pole_klient_nazwisko.delete(0, tk.END)
+        pole_klient_nazwisko.insert(0, klient.nazwisko)
+        pole_klient_lokalizacja.delete(0, tk.END)
+        pole_klient_lokalizacja.insert(0, klient.lokalizacja)
+        lista_rozwijalna_klient_kino.set(klient.kino)
+        przycisk_dodaj_klient.config(text="Zapisz", command=lambda: aktualizuj_klienta(klient))
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano klienta do edycji.")
+
+
+def aktualizuj_klienta(klient):
+    imie = pole_klient_imie.get()
+    nazwisko = pole_klient_nazwisko.get()
+    lokalizacja = pole_klient_lokalizacja.get()
+    kino_wybrane = lista_rozwijalna_klient_kino.get()
+
+    if imie and nazwisko and lokalizacja and kino_wybrane:
+        wsp = pobierz_wspolrzedne(lokalizacja)
+        if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
+            messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
+            return
+
+        klient.aktualizuj(imie, nazwisko, kino_wybrane, lokalizacja)
+        pokaz_szczegoly_klienta()
+        globalna_aktualizacja()
+        przycisk_dodaj_klient.config(text="Dodaj", command=dodaj_klienta)
+        pole_klient_imie.delete(0, tk.END)
+        pole_klient_nazwisko.delete(0, tk.END)
+        pole_klient_lokalizacja.delete(0, tk.END)
+        odswiez_liste_klientow()
+        if lista_klientow.curselection():
+            pokaz_szczegoly_klienta(None)
+        informacje_o_wybranym_kliencie.update_idletasks()
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla klienta (Imię, Nazwisko, Lokalizacja).")
+
+
+def pokaz_szczegoly_klienta(event=None):
+    global szczegoly_klienta_tekst
+    try:
+        indeks = lista_klientow.curselection()[0]
+        klient = klienci[indeks]
+
+        kino_klienta = None
+        for k in kina:
+            if wyswietl_kino(k) == klient.kino:
+                kino_klienta = k
+                break
+
+        podstawowe_szczegoly = (
+            f"Imię: {klient.imie}\n"
+            f"Nazwisko: {klient.nazwisko}\n"
+        )
+
+        if klient.kino == "Wszystkie":
+            podstawowe_szczegoly += f"Kino: {klient.kino}\n"
+
+        dodatkowe_szczegoly = ""
+        if klient.kino != "Wszystkie":
+            dodatkowe_szczegoly = (
+                f"Lokalizacja: {klient.lokalizacja}\n"
+                f"Współrzędne: {klient.wspolrzedne}\n"
+                f"Kino: {klient.kino}\n"
+                f"Lokalizacja kina: {kino_klienta.lokalizacja if kino_klienta else 'Nieznana'}\n"
+            )
+
+        szczegoly = podstawowe_szczegoly + dodatkowe_szczegoly + (
+            f"Sieć kina: {kino_klienta.siec if kino_klienta else 'Wszystkie'}\n"
+        )
+
+        szczegoly_klienta_tekst = szczegoly
+        informacje_o_wybranym_kliencie.config(text=szczegoly_klienta_tekst)
+    except IndexError:
+        informacje_o_wybranym_kliencie.config(text="Nie wybrano klienta.")
 
 
 # -------------------------- ZAKŁADKA MAPY -------------------------- #
