@@ -611,31 +611,208 @@ def pokaz_szczegoly_klienta(event=None):
 
 
 def odswiez_mape():
-    pass
+    aktualny_zoom = widget_mapy.zoom
+    widget_mapy.set_zoom(aktualny_zoom + 1)
+    widget_mapy.set_zoom(aktualny_zoom)
+
+
+def wyczysc_mape():
+    widget_mapy.delete_all_marker()
 
 
 def pokaz_wszystkie_kina_na_mapie():
-    pass
-
-
-def pokaz_kin_po_sieci():
-    pass
-
-
-def pokaz_szczegoly_kina_na_mapie():
-    pass
-
-
-def pokaz_kina_dla_seansu():
-    pass
+    widget_mapy.set_zoom(6)
+    wyczysc_mape()
+    for kino in kina:
+        widget_mapy.set_marker(kino.wspolrzedne[0], kino.wspolrzedne[1], text=f"Kino: {wyswietl_kino(kino)}", text_color="black")
 
 
 def pokaz_pracownikow_na_mapie():
-    pass
+    wybrane_kino = lista_rozwijalna_kino_mapy.get()
+
+    if wybrane_kino == "Nie wybrano kina":
+        messagebox.showerror("Błąd", "Nie wybrano kina. Wybierz kino z listy.")
+        return
+
+    widget_mapy.set_zoom(6)
+    wyczysc_mape()
+
+    filtrowani = [p for p in pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
+
+    if not filtrowani:
+        if wybrane_kino == "Wszystkie":
+            messagebox.showinfo("Informacja", "Brak pracowników w systemie.")
+        else:
+            messagebox.showinfo("Informacja", f"Wybrane kino '{wybrane_kino}' nie ma jeszcze pracowników.")
+        return
+
+    for pracownik in filtrowani:
+        widget_mapy.set_marker(
+            pracownik.wspolrzedne[0],
+            pracownik.wspolrzedne[1],
+            text=f"Pracownik: {pracownik.imie} {pracownik.nazwisko}",
+            marker_color_outside="blue",
+            marker_color_circle="darkblue",
+            text_color="black"
+        )
 
 
 def pokaz_klientow_na_mapie():
-    pass
+    wybrane_kino = lista_rozwijalna_kino_mapy.get()
+
+    if wybrane_kino == "Nie wybrano kina":
+        messagebox.showerror("Błąd", "Nie wybrano kina. Wybierz kino z listy.")
+        return
+
+    widget_mapy.set_zoom(6)
+    wyczysc_mape()
+
+    filtrowani = [k for k in klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
+
+    if not filtrowani:
+        if wybrane_kino == "Wszystkie":
+            messagebox.showinfo("Informacja", "Brak klientów w systemie.")
+        else:
+            messagebox.showinfo("Informacja", f"Wybrane kino '{wybrane_kino}' nie ma jeszcze klientów.")
+        return
+
+    for klient in filtrowani:
+        widget_mapy.set_marker(
+            klient.wspolrzedne[0],
+            klient.wspolrzedne[1],
+            text=f"Klient: {klient.imie} {klient.nazwisko}",
+            marker_color_outside="green",
+            marker_color_circle="darkgreen",
+            text_color="black"
+        )
+
+
+def pokaz_kin_po_sieci():
+    wybrana_siec = lista_rozwijalna_siec_mapy.get()
+
+    if wybrana_siec == "Nie wybrano sieci":
+        messagebox.showerror("Błąd", "Nie wybrano sieci kin. Wybierz sieć z listy.")
+        return
+
+    widget_mapy.set_zoom(6)
+    wyczysc_mape()
+
+    filtrowane_kina = [k for k in kina if wybrana_siec == "Wszystkie" or k.siec == wybrana_siec]
+
+    if not filtrowane_kina:
+        if wybrana_siec == "Wszystkie":
+            messagebox.showinfo("Informacja", "Brak kin w systemie.")
+        else:
+            messagebox.showinfo("Informacja", f"Brak kin sieci '{wybrana_siec}' w systemie.")
+        return
+
+    for kino in filtrowane_kina:
+        widget_mapy.set_marker(
+            kino.wspolrzedne[0],
+            kino.wspolrzedne[1],
+            text=f"Kino: {wyswietl_kino(kino)}",
+            text_color="black"
+        )
+
+
+def pokaz_kina_dla_seansu():
+    wybrany_seans = lista_rozwijalna_seans_mapy.get()
+
+    if wybrany_seans == "Nie wybrano seansu":
+        messagebox.showerror("Błąd", "Nie wybrano seansu. Wybierz seans z listy.")
+        return
+
+    widget_mapy.set_zoom(6)
+    wyczysc_mape()
+
+    znalezione_seanse = [s for s in seanse if s.tytul == wybrany_seans]
+
+    if not znalezione_seanse:
+        messagebox.showinfo("Informacja", f"Brak kin z seansem '{wybrany_seans}' w systemie.")
+        return
+
+    znalezione_kina = []
+    for seans in znalezione_seanse:
+        for kino in kina:
+            if wyswietl_kino(kino) == seans.kino:
+                znalezione_kina.append(kino)
+                widget_mapy.set_marker(
+                    kino.wspolrzedne[0],
+                    kino.wspolrzedne[1],
+                    text=f"Kino: {wyswietl_kino(kino)}\nGodzina: {seans.godzina_rozpoczecia}\nData: {seans.data}",
+                    marker_color_outside="orange",
+                    marker_color_circle="chocolate",
+                    text_color="black"
+                )
+
+    if not znalezione_kina:
+        messagebox.showinfo("Informacja", f"Brak kin z seansem '{wybrany_seans}' w systemie.")
+
+
+def aktualizuj_kino_na_mapie_po_sieci():
+    wybrana_siec = lista_rozwijalna_siec_mapy.get()
+    if wybrana_siec == "Wszystkie":
+        nazwy_kin = [wyswietl_kino(kino) for kino in kina]
+    else:
+        nazwy_kin = [wyswietl_kino(kino) for kino in kina if kino.siec == wybrana_siec]
+    lista_rozwijalna_kino_mapy['values'] = ["Wszystkie"] + nazwy_kin
+    lista_rozwijalna_kino_mapy.set("Wszystkie")
+
+
+def aktualizuj_liste_seansow_na_mapie():
+    unikalne_tytuly = sorted({s.tytul for s in seanse})
+    lista_seansow_mapy = ["Nie wybrano seansu"] + unikalne_tytuly
+    lista_rozwijalna_seans_mapy['values'] = lista_seansow_mapy
+    lista_rozwijalna_seans_mapy.set("Nie wybrano seansu")
+
+
+def odswiez_liste_sieci_na_mapie():
+    sieci = sorted({kino.siec for kino in kina})
+    lista_rozwijalna_siec_mapy['values'] = ["Wszystkie"] + sieci
+    lista_rozwijalna_siec_mapy.set("Wszystkie")
+
+
+def pokaz_szczegoly_kina_na_mapie(event=None):
+    selected = lista_rozwijalna_kino_mapy.get()
+    if selected == "Nie wybrano kina":
+        messagebox.showerror("Błąd", "Wybierz konkretne kino z listy.")
+        return
+
+    kino_wybrane = None
+    for kino in kina:
+        if wyswietl_kino(kino) == selected:
+            kino_wybrane = kino
+            break
+
+    if kino_wybrane is None:
+        messagebox.showerror("Błąd", "Nie znaleziono kina o podanej nazwie.")
+        return
+
+    widget_mapy.delete_all_marker()
+    widget_mapy.set_position(kino_wybrane.wspolrzedne[0], kino_wybrane.wspolrzedne[1])
+    widget_mapy.set_zoom(15)
+    widget_mapy.set_marker(
+        kino_wybrane.wspolrzedne[0],
+        kino_wybrane.wspolrzedne[1],
+        text=f"Kino: {wyswietl_kino(kino_wybrane)}",
+        text_color="black"
+    )
+
+    liczba_pracownikow = len([p for p in pracownicy if p.kino == wyswietl_kino(kino_wybrane)])
+    liczba_klientow = len([k for k in klienci if k.kino == wyswietl_kino(kino_wybrane)])
+    liczba_seansow = len([s for s in seanse if s.kino == wyswietl_kino(kino_wybrane)])
+
+    szczegoly = (f"Nazwa: {kino_wybrane.nazwa}\n"
+                 f"Sieć: {kino_wybrane.siec}\n"
+                 f"Lokalizacja: {kino_wybrane.lokalizacja}\n"
+                 f"Współrzędne: {kino_wybrane.wspolrzedne}\n"
+                 f"Liczba pracowników: {liczba_pracownikow}\n"
+                 f"Liczba klientów: {liczba_klientow}\n"
+                 f"Liczba seansów: {liczba_seansow}")
+
+    tytul = f"Szczegóły kina \"{kino_wybrane.nazwa} ({kino_wybrane.siec})\""
+    messagebox.showinfo(tytul, szczegoly)
+
 
 
 def podpowiedzi_przyciskow_na_mapie(widget, text):
@@ -660,8 +837,20 @@ def podpowiedzi_przyciskow_na_mapie(widget, text):
     tooltip.withdraw()
     return tooltip
 
-# -------------------------- GLOBALNA AKTUALIZACJA -------------------------- #
+# -------------------------- GLOBALNE AKTUALIZACJE -------------------------- #
 
+def odswiez_listy_rozwijalne_kin():
+    nazwy_kin = [wyswietl_kino(kino) for kino in kina]
+    lista_rozwijalna_pracownik_kino['values'] = ["Wszystkie"] + nazwy_kin
+    lista_rozwijalna_pracownik_kino.set("Wszystkie")
+    lista_rozwijalna_klient_kino['values'] = ["Wszystkie"] + nazwy_kin
+    lista_rozwijalna_klient_kino.set("Wszystkie")
+    lista_rozwijalna_seans_kino['values'] = ["Wszystkie"] + nazwy_kin
+    lista_rozwijalna_seans_kino.set("Wszystkie")
+    odswiez_liste_sieci_na_mapie()
+    aktualizuj_kino_na_mapie_po_sieci()
+    aktualizuj_liste_seansow_na_mapie()
+    odswiez_filtr_sieci_kin()
 
 def globalna_aktualizacja():
     # Zapamiętaj aktualny stan interfejsu
@@ -741,19 +930,6 @@ def pobierz_sciezke_ikony():
 
     return sciezka_ikony
 
-def odswiez_listy_rozwijalne_kin():
-    pass
-
-def odswiez_liste_sieci_na_mapie():
-    pass
-
-
-def aktualizuj_kino_na_mapie_po_sieci():
-    pass
-
-
-def aktualizuj_liste_seansow_na_mapie():
-    pass
 
 root = tk.Tk()
 root.title("System do zarządzania siecią kin")
