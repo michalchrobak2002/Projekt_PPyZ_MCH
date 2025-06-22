@@ -147,25 +147,183 @@ def dodaj_kino():
 
 # -------------------------- ZAKŁADKA SEANSE -------------------------- #
 
-
 def odswiez_liste_seansow():
-    pass
+    lista_seansow.delete(0, tk.END)
+    wybrane_kino = lista_rozwijalna_seans_kino.get()
+
+    filtrowane_seanse = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+
+    for indeks, seans in enumerate(filtrowane_seanse):
+        kino_seansu = None
+        for k in kina:
+            if wyswietl_kino(k) == seans.kino:
+                kino_seansu = k
+                break
+
+        if kino_seansu:
+            wpis = f"{indeks + 1}. {seans.tytul} ({seans.godzina_rozpoczecia}, {seans.data}) - {kino_seansu.nazwa} ({kino_seansu.siec})"
+        else:
+            wpis = f"{indeks + 1}. {seans.tytul} ({seans.godzina_rozpoczecia}, {seans.data}) - {seans.kino}"
+
+        lista_seansow.insert(tk.END, wpis)
+
+#    print("\nFunkcja odswiez_liste_seansow: Lista została zaktualizowana.")
 
 
-def pokaz_szczegoly_seansu():
-    pass
-
-
-def edytuj_seans():
-    pass
-
-
-def usun_seans():
-    pass
+def aktualizuj_seanse_po_zmianie_kina(stara_nazwa, nowa_nazwa):
+    for seans in seanse:
+        if seans.kino == stara_nazwa:
+            seans.kino = nowa_nazwa
+    globalna_aktualizacja()
 
 
 def dodaj_seans():
-    pass
+    tytul = pole_seans_tytul.get()
+    data = pole_seans_data.get()
+    godzina = pole_seans_godzina.get()
+    czas_trwania = pole_seans_czas_trwania.get()
+    kino_wybrane = lista_rozwijalna_seans_kino.get()
+
+    if tytul and data and godzina and czas_trwania and kino_wybrane and kino_wybrane != "Wybierz kino":
+        if not sprawdz_format_daty(data):
+            messagebox.showerror("Błąd", "Podaj datę w formacie DD.MM.RRRR (np. 31.12.2023)")
+            return
+
+        if not sprawdz_format_godziny(godzina):
+            messagebox.showerror("Błąd", "Podaj godzinę w formacie HH:MM (np. 14:30)")
+            return
+
+        try:
+            czas_trwania = int(czas_trwania)
+            if czas_trwania <= 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Błąd", "Czas trwania seansu musi być liczbą całkowitą większą od 0.")
+            return
+
+        nowy_seans = Seans(tytul, data, godzina, czas_trwania, kino_wybrane)
+        seanse.append(nowy_seans)
+        globalna_aktualizacja()
+        pole_seans_tytul.delete(0, tk.END)
+        pole_seans_data.delete(0, tk.END)
+        pole_seans_godzina.delete(0, tk.END)
+        pole_seans_czas_trwania.delete(0, tk.END)
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla seansu (Tytuł, Data, Godzina, Czas trwania).")
+
+
+def usun_seans():
+    try:
+        wybrane_kino = lista_rozwijalna_seans_kino.get()
+        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        indeks = lista_seansow.curselection()[0]
+        seans = filtrowani[indeks]
+        seanse.remove(seans)
+        odswiez_liste_seansow()
+        aktualizuj_liste_seansow_na_mapie()
+        globalna_aktualizacja()
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano seansu do usunięcia.")
+
+
+def edytuj_seans():
+    try:
+        wybrane_kino = lista_rozwijalna_seans_kino.get()
+        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        indeks = lista_seansow.curselection()[0]
+        seans = filtrowani[indeks]
+
+        pole_seans_tytul.delete(0, tk.END)
+        pole_seans_tytul.insert(0, seans.tytul)
+        pole_seans_data.delete(0, tk.END)
+        pole_seans_data.insert(0, seans.data)
+        pole_seans_godzina.delete(0, tk.END)
+        pole_seans_godzina.insert(0, seans.godzina_rozpoczecia)
+        pole_seans_czas_trwania.delete(0, tk.END)
+        pole_seans_czas_trwania.insert(0, seans.czas_trwania)
+        lista_rozwijalna_seans_kino.set(seans.kino)
+
+        przycisk_dodaj_seans.config(text="Zapisz", command=lambda: aktualizuj_seans(seans))
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano seansu do edycji.")
+
+
+def aktualizuj_seans(seans):
+    tytul = pole_seans_tytul.get()
+    data = pole_seans_data.get()
+    godzina = pole_seans_godzina.get()
+    czas_trwania = pole_seans_czas_trwania.get()
+    kino_wybrane = lista_rozwijalna_seans_kino.get()
+
+    if tytul and data and godzina and czas_trwania and kino_wybrane:
+        if not sprawdz_format_daty(data):
+            messagebox.showerror("Błąd", "Podaj datę w formacie DD.MM.RRRR (np. 31.12.2023)")
+            return
+
+        if not sprawdz_format_godziny(godzina):
+            messagebox.showerror("Błąd", "Podaj godzinę w formacie HH:MM (np. 14:30)")
+            return
+
+        try:
+            czas_trwania = int(czas_trwania)
+            if czas_trwania <= 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Błąd", "Czas trwania seansu musi być liczbą całkowitą większą od 0.")
+            return
+
+        seans.aktualizuj(tytul, data, godzina, czas_trwania, kino_wybrane)
+        pokaz_szczegoly_seansu()
+        globalna_aktualizacja()
+        przycisk_dodaj_seans.config(text="Dodaj", command=dodaj_seans)
+        pole_seans_tytul.delete(0, tk.END)
+        pole_seans_data.delete(0, tk.END)
+        pole_seans_godzina.delete(0, tk.END)
+        pole_seans_czas_trwania.delete(0, tk.END)
+        odswiez_liste_seansow()
+        if lista_seansow.curselection():
+            pokaz_szczegoly_seansu(None)
+        informacje_o_wybranym_seansie.update_idletasks()
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla seansu (Tytuł, Data, Godzina, Czas trwania).")
+        globalna_aktualizacja()
+
+
+def pokaz_szczegoly_seansu(event=None):
+    global szczegoly_seansu_tekst
+    try:
+        wybrane_kino = lista_rozwijalna_seans_kino.get()
+        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        indeks = lista_seansow.curselection()[0]
+        seans = filtrowani[indeks]
+
+        kino_seansu = None
+        for k in kina:
+            if wyswietl_kino(k) == seans.kino:
+                kino_seansu = k
+                break
+
+        podstawowe_szczegoly = (
+            f"Tytuł: {seans.tytul}\n"
+            f"Data: {seans.data}\n"
+            f"Godzina: {seans.godzina_rozpoczecia}\n"
+            f"Czas trwania: {seans.czas_trwania} min\n"
+            f"Kino: {seans.kino}\n"
+        )
+
+        dodatkowe_szczegoly = ""
+        if seans.kino != "Wszystkie":
+            dodatkowe_szczegoly = (
+                f"Lokalizacja kina: {kino_seansu.lokalizacja if kino_seansu else 'Nieznana'}\n"
+                f"Sieć kina: {kino_seansu.siec if kino_seansu else 'Wszystkie'}\n"
+            )
+
+        szczegoly = podstawowe_szczegoly + dodatkowe_szczegoly
+
+        szczegoly_seansu_tekst = szczegoly
+        informacje_o_wybranym_seansie.config(text=szczegoly_seansu_tekst)
+    except IndexError:
+        informacje_o_wybranym_seansie.config(text="Nie wybrano seansu.")
 
 
 # -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
