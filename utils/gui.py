@@ -14,7 +14,22 @@ szczegoly_pracownika_tekst = "Nie wybrano pracownika"
 szczegoly_klienta_tekst = "Nie wybrano klienta"
 szczegoly_seansu_tekst = "Nie wybrano seansu"
 
+# -------------------------- FUNKCJE DO OBSŁUGI POŁĄCZENIA Z INTERNETEM -------------------------- #
+def wyswietl_brak_internetu():
+    root.after(0, lambda: messagebox.showwarning("Brak połączenia z Internetem",
+                                                 "Utracono połączenie z Internetem. Proszę połączyć się z siecią, aby korzystać z pełnej funkcjonalności aplikacji"))
+def podlaczono_internet():
+    root.after(0, lambda: messagebox.showinfo("Połączono z Internetem",
+                                              "Internet został ponownie przywrócony. Wszystkie informacje zostały zaktualizowane i odświeżone."))
+    root.after(10, wyczysc_mape)
+    root.after(10, aktualizuj_wspolrzedne_po_polaczeniu)
+    root.after(10, odswiez_mape)
 
+def aktualizuj_wspolrzedne_po_polaczeniu():
+    controller.aktualizuj_wspolrzedne()
+    globalna_aktualizacja()
+    if zakladki.tab(zakladki.select(), "text") == "Mapa":
+        odswiez_mape()
 # -------------------------- FUNKCJE DO ZARZĄDZANIA KINAMI -------------------------- #
 
 
@@ -859,6 +874,27 @@ def odswiez_listy_rozwijalne_kin():
     aktualizuj_liste_seansow_na_mapie()
     odswiez_filtr_sieci_kin()
 
+def aktualizuj_po_zmianie_zakladki(event):
+    id_aktualnej_zakladki = zakladki.select()
+    nazwa_zakladki = zakladki.tab(id_aktualnej_zakladki, "text")
+
+    # Sprawdzanie połączenia z internetem
+    if not model.czy_jest_internet:
+        messagebox.showwarning("Brak połączenia z Internetam", "Utracono połączenie z Internetem. Proszę połączyć się z siecią, aby korzystać z pełnej funkcjonalności aplikacji.")
+
+    if nazwa_zakladki == "Kina":
+        informacje_o_wybranym_kinie.config(text=szczegoly_kina_tekst)
+    elif nazwa_zakladki == "Pracownicy":
+        informacje_o_wybranym_pracowniku.config(text=szczegoly_pracownika_tekst)
+    elif nazwa_zakladki == "Klienci":
+        informacje_o_wybranym_kliencie.config(text=szczegoly_klienta_tekst)
+    elif nazwa_zakladki == "Seanse":
+        informacje_o_wybranym_seansie.config(text=szczegoly_seansu_tekst)
+    elif nazwa_zakladki == "Mapa":
+        if not model.czy_jest_internet:
+            messagebox.showwarning("Brak połączenia z Internetem", "Funkcje mapy wymagają połączenia z Internetem. Proszę połączyć się z siecią.")
+        else:
+            odswiez_mape()
 
 def globalna_aktualizacja():
     # Zapamiętaj aktualny stan interfejsu
@@ -969,6 +1005,7 @@ style.configure("Group.TLabelframe.Label", background="lightblue", anchor="cente
 
 zakladki = ttk.Notebook(root)
 zakladki.pack(fill="both", expand=True)
+zakladki.bind("<<NotebookTabChanged>>", aktualizuj_po_zmianie_zakladki)
 
 # --- Zakładka kina --- #
 

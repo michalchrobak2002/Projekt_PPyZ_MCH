@@ -2,6 +2,9 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
+poprzedni_stan_internetu = True
+czy_jest_internet = True
+
 folder_nazwa = "Dane_aplikacji_System_do_zarzadzania_siecia_kin"
 folder_danych = ""
 plik_kin = os.path.join(folder_danych, "Kina.json")
@@ -10,7 +13,7 @@ plik_pracownikow = os.path.join(folder_danych, "Pracownicy.json")
 plik_klientow = os.path.join(folder_danych, "Klienci.json")
 
 
-def pobierz_wspolrzedne(lokalizacja, czy_jest_internet=True):
+def pobierz_wspolrzedne(lokalizacja):
     try:
         if not czy_jest_internet:
             return (52.23, 21.00)

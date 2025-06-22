@@ -1,9 +1,37 @@
 import atexit
 import os
 import sys
+import time
+import threading
+import requests
 
-from utils import gui, controller
+from utils import gui, controller, model
 
+def sprawdz_polaczenie_internetowe():
+    """ Sprawdza połączenie internetowe i aktualizuje globalny stan """
+    try:
+        requests.get("https://www.google.com", timeout=5)
+        nowy_status = True
+    except:
+        nowy_status = False
+
+    model.poprzedni_stan_internetu = model.czy_jest_internet
+    if nowy_status != model.czy_jest_internet:
+        model.czy_jest_internet = nowy_status
+
+        if model.czy_jest_internet and not model.poprzedni_stan_internetu:
+            gui.podlaczono_internet()
+        elif not model.czy_jest_internet:
+            gui.wyswietl_brak_internetu()
+
+def uruchom_monitorowanie_internetu():
+    """ Uruchamia w tle monitorowanie połączenia internetowego """
+    def monitor():
+        while True:
+            sprawdz_polaczenie_internetowe()
+            time.sleep(5)
+
+    threading.Thread(target=monitor, daemon=True).start()
 
 @atexit.register
 def cleanup():
@@ -19,6 +47,8 @@ def zamykanie():
     gui.root.destroy()
 
 
+
+uruchom_monitorowanie_internetu()
 if getattr(sys, 'frozen', False):
     katalog_bazowy = os.path.dirname(sys.executable)
 else:
