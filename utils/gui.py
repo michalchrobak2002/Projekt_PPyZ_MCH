@@ -7,6 +7,13 @@ import tempfile
 
 from utils.model import *
 
+
+
+szczegoly_kina_tekst = "Nie wybrano kina"
+szczegoly_pracownika_tekst = "Nie wybrano pracownika"
+szczegoly_klienta_tekst = "Nie wybrano klienta"
+szczegoly_seansu_tekst = "Nie wybrano seansu"
+
 # -------------------------- ZAKŁADKA KIN -------------------------- #
 
 def wyswietl_kino(kino):
@@ -328,25 +335,139 @@ def pokaz_szczegoly_seansu(event=None):
 
 # -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
 
-
 def odswiez_liste_pracownikow():
-    pass
+    lista_pracownikow.delete(0, tk.END)
+    wybrane_kino = lista_rozwijalna_pracownik_kino.get()
+
+    if wybrane_kino == "Wszystkie" or not wybrane_kino:
+        for indeks, pracownik in enumerate(pracownicy):
+            lista_pracownikow.insert(tk.END, f"{indeks + 1}. {pracownik.imie} {pracownik.nazwisko} - {pracownik.kino}")
+    else:
+        for indeks, pracownik in enumerate([p for p in pracownicy if p.kino == wybrane_kino]):
+            lista_pracownikow.insert(tk.END, f"{indeks + 1}. {pracownik.imie} {pracownik.nazwisko} - {pracownik.kino}")
+
+#    print("\nFunkcja odswiez_liste_pracownikow: Lista została zaktualizowana.")
 
 
-def pokaz_szczegoly_pracownika():
-    pass
-
-
-def edytuj_pracownika():
-    pass
+def dodaj_pracownika():
+    imie = pole_pracownik_imie.get()
+    nazwisko = pole_pracownik_nazwisko.get()
+    lokalizacja = pole_pracownik_lokalizacja.get()
+    kino_wybrane = lista_rozwijalna_pracownik_kino.get()
+    if imie and nazwisko and lokalizacja and kino_wybrane and kino_wybrane != "Wybierz kino":
+        wsp = pobierz_wspolrzedne(lokalizacja)
+        if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
+            messagebox.showerror("Błąd", "Błędna lokalizacja, wprowadź poprawną lokalizację.")
+            return
+        nowy_pracownik = Pracownik(imie, nazwisko, kino_wybrane, lokalizacja)
+        pracownicy.append(nowy_pracownik)
+        globalna_aktualizacja()
+        pole_pracownik_imie.delete(0, tk.END)
+        pole_pracownik_nazwisko.delete(0, tk.END)
+        pole_pracownik_lokalizacja.delete(0, tk.END)
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla pracownika (Imię, Nazwisko, Lokalizacja).")
 
 
 def usun_pracownika():
+    try:
+        indeks = lista_pracownikow.curselection()[0]
+        wybrane_kino = lista_rozwijalna_pracownik_kino.get()
 
-    pass
+        if wybrane_kino == "Wszystkie":
+            pracownik = pracownicy[indeks]
+        else:
+            pracownik = [p for p in pracownicy if p.kino == wybrane_kino][indeks]
 
-def dodaj_pracownika():
-    pass
+        pracownicy.remove(pracownik)
+        odswiez_liste_pracownikow()
+        globalna_aktualizacja()
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano pracownika do usunięcia.")
+
+
+def edytuj_pracownika():
+    try:
+        wybrane_kino = lista_rozwijalna_pracownik_kino.get()
+        filtrowani = [p for p in pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
+        indeks = lista_pracownikow.curselection()[0]
+        pracownik = filtrowani[indeks]
+        pole_pracownik_imie.delete(0, tk.END)
+        pole_pracownik_imie.insert(0, pracownik.imie)
+        pole_pracownik_nazwisko.delete(0, tk.END)
+        pole_pracownik_nazwisko.insert(0, pracownik.nazwisko)
+        pole_pracownik_lokalizacja.delete(0, tk.END)
+        pole_pracownik_lokalizacja.insert(0, pracownik.lokalizacja)
+        lista_rozwijalna_pracownik_kino.set(pracownik.kino)
+        przycisk_dodaj_pracownik.config(text="Zapisz", command=lambda: aktualizuj_pracownika(pracownik))
+    except IndexError:
+        messagebox.showerror("Błąd", "Nie wybrano pracownika do edycji.")
+
+
+def aktualizuj_pracownika(pracownik):
+    imie = pole_pracownik_imie.get()
+    nazwisko = pole_pracownik_nazwisko.get()
+    lokalizacja = pole_pracownik_lokalizacja.get()
+    kino_wybrane = lista_rozwijalna_pracownik_kino.get()
+
+    if imie and nazwisko and lokalizacja and kino_wybrane:
+        wsp = pobierz_wspolrzedne(lokalizacja)
+        if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
+            messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
+            return
+
+        pracownik.aktualizuj(imie, nazwisko, kino_wybrane, lokalizacja)
+        pokaz_szczegoly_pracownika()
+        globalna_aktualizacja()
+        przycisk_dodaj_pracownik.config(text="Dodaj", command=dodaj_pracownika)
+        pole_pracownik_imie.delete(0, tk.END)
+        pole_pracownik_nazwisko.delete(0, tk.END)
+        pole_pracownik_lokalizacja.delete(0, tk.END)
+        odswiez_liste_pracownikow()
+        if lista_pracownikow.curselection():
+            pokaz_szczegoly_pracownika(None)
+        informacje_o_wybranym_pracowniku.update_idletasks()
+    else:
+        messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla pracownika (Imię, Nazwisko, Lokalizacja).")
+
+
+def pokaz_szczegoly_pracownika(event=None):
+    global szczegoly_pracownika_tekst
+    try:
+        indeks = lista_pracownikow.curselection()[0]
+        pracownik = pracownicy[indeks]
+
+        kino_pracownika = None
+        for k in kina:
+            if wyswietl_kino(k) == pracownik.kino:
+                kino_pracownika = k
+                break
+
+        podstawowe_szczegoly = (
+            f"Imię: {pracownik.imie}\n"
+            f"Nazwisko: {pracownik.nazwisko}\n"
+        )
+
+        if pracownik.kino == "Wszystkie":
+            podstawowe_szczegoly += f"Kino: {pracownik.kino}\n"
+
+        dodatkowe_szczegoly = ""
+        if pracownik.kino != "Wszystkie":
+            dodatkowe_szczegoly = (
+                f"Lokalizacja: {pracownik.lokalizacja}\n"
+                f"Współrzędne: {pracownik.wspolrzedne}\n"
+                f"Kino: {pracownik.kino}\n"
+                f"Lokalizacja kina: {kino_pracownika.lokalizacja if kino_pracownika else 'Nieznana'}\n"
+            )
+
+        szczegoly = podstawowe_szczegoly + dodatkowe_szczegoly + (
+            f"Sieć kina: {kino_pracownika.siec if kino_pracownika else 'Wszystkie'}\n"
+        )
+
+        szczegoly_pracownika_tekst = szczegoly
+        informacje_o_wybranym_pracowniku.config(text=szczegoly_pracownika_tekst)
+    except IndexError:
+        informacje_o_wybranym_pracowniku.config(text="Nie wybrano pracownika.")
 
 
 # -------------------------- ZAKŁADKA KLIENCI -------------------------- #
@@ -572,7 +693,7 @@ ramka_listy_kin.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
 ttk.Label(ramka_listy_kin, text="Lista kin:").pack()
 lista_kin = tk.Listbox(ramka_listy_kin, width=60, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
 lista_kin.pack()
-lista_kin.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_kina)
+lista_kin.bind("<<ListboxSelect>>", pokaz_szczegoly_kina)
 
 ramka_przyciskow_kin = ttk.Frame(ramka_listy_kin)
 ramka_przyciskow_kin.pack(pady=5)
@@ -629,7 +750,7 @@ ramka_listy_seans.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
 ttk.Label(ramka_listy_seans, text="Lista seansów:").pack()
 lista_seansow = tk.Listbox(ramka_listy_seans, width=59, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
 lista_seansow.pack()
-lista_seansow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_seansu)
+lista_seansow.bind("<<ListboxSelect>>", pokaz_szczegoly_seansu)
 
 ramka_przyciskow_seans = ttk.Frame(ramka_listy_seans)
 ramka_przyciskow_seans.pack(pady=5)
@@ -691,7 +812,7 @@ ramka_listy_pracownik.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
 ttk.Label(ramka_listy_pracownik, text="Lista pracowników:").pack()
 lista_pracownikow = tk.Listbox(ramka_listy_pracownik, width=60,height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
 lista_pracownikow.pack()
-lista_pracownikow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_pracownika)
+lista_pracownikow.bind("<<ListboxSelect>>", pokaz_szczegoly_pracownika)
 
 ramka_przyciskow_pracownik = ttk.Frame(ramka_listy_pracownik)
 ramka_przyciskow_pracownik.pack(pady=5)
@@ -748,7 +869,7 @@ ramka_listy_klient.grid(row=1, column=0, padx=10, pady=2, sticky="ns")
 ttk.Label(ramka_listy_klient, text="Lista klientów:").pack()
 lista_klientow = tk.Listbox(ramka_listy_klient, width=60, height=25)  # , bg="lightblue", fg="black" - jako kolor tabeli
 lista_klientow.pack()
-lista_klientow.bind("<<ListboxSelect>>", lambda e: pokaz_szczegoly_klienta)
+lista_klientow.bind("<<ListboxSelect>>", pokaz_szczegoly_klienta)
 
 ramka_przyciskow_klient = ttk.Frame(ramka_listy_klient)
 ramka_przyciskow_klient.pack(pady=5)
