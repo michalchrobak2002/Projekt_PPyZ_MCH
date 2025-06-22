@@ -1,12 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
 import tkintermapview
+import ctypes
 
 from gui_utils import *
 
 root = tk.Tk()
 root.title("System do zarządzania siecią kin")
 root.geometry("1200x800")
+
+# Załadowanie ikony
+myappid = u'System.do.zarzadzania.siecia.kin'
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+sciezka_ikony  = pobierz_sciezke_ikony()
+if sciezka_ikony :
+    root.iconbitmap(sciezka_ikony )
+else:
+    print("Nie udało się załadować ikony")
 
 style = ttk.Style()
 style.theme_use('clam')
@@ -27,7 +37,7 @@ style.configure("Group.TLabelframe.Label", background="lightblue", anchor="cente
 zakladki = ttk.Notebook(root)
 zakladki.pack(fill="both", expand=True)
 
-# --- Zakładka Kin --- #
+# -------------------------- ZAKŁADKA KIN -------------------------- #
 
 zakladka_kin = ttk.Frame(zakladki)
 zakladki.add(zakladka_kin, text="Kina")
@@ -82,7 +92,7 @@ pole_kino_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_kina = ttk.Button(ramka_formularza_kin, text="Dodaj", command=dodaj_kino)
 przycisk_dodaj_kina.grid(row=4, column=1, columnspan=2, pady=10)
 
-# --- Zakładka Seanse --- #
+# -------------------------- ZAKŁADKA SEANSE -------------------------- #
 
 zakladka_seanse = ttk.Frame(zakladki)
 zakladki.add(zakladka_seanse, text="Seanse")
@@ -141,7 +151,7 @@ pole_seans_czas_trwania.grid(row=4, column=1, padx=2, pady=5)
 przycisk_dodaj_seans = ttk.Button(ramka_formularza_seans, text="Dodaj", command=dodaj_seans)
 przycisk_dodaj_seans.grid(row=5, column=1, columnspan=2, pady=10)
 
-# --- Zakładka Pracownicy --- #
+# -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
 
 zakladka_pracownicy = ttk.Frame(zakladki)
 zakladki.add(zakladka_pracownicy, text="Pracownicy")
@@ -197,7 +207,7 @@ pole_pracownik_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_pracownik = ttk.Button(ramka_formularza_pracownik, text="Dodaj", command=dodaj_pracownika)
 przycisk_dodaj_pracownik.grid(row=4, column=1, columnspan=2, pady=10)
 
-# --- Zakładka Klienci --- #
+# -------------------------- ZAKŁADKA KLIENCI -------------------------- #
 
 zakladka_klienci = ttk.Frame(zakladki)
 zakladki.add(zakladka_klienci, text="Klienci")
@@ -252,7 +262,7 @@ pole_klient_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_klient = ttk.Button(ramka_formularza_klient, text="Dodaj", command=dodaj_klienta)
 przycisk_dodaj_klient.grid(row=4, column=1, columnspan=2, pady=10)
 
-# --- Zakładka Mapy --- #
+# -------------------------- ZAKŁADKA MAPY -------------------------- #
 
 zakladka_mapy = ttk.Frame(zakladki)
 zakladki.add(zakladka_mapy, text="Mapa")
