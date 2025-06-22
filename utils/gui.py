@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import tkintermapview
 import ctypes
-import os
 import tempfile
+import os
 
-from utils.model import *
-
+from utils import model
+from utils import controller
 
 
 szczegoly_kina_tekst = "Nie wybrano kina"
@@ -14,17 +14,20 @@ szczegoly_pracownika_tekst = "Nie wybrano pracownika"
 szczegoly_klienta_tekst = "Nie wybrano klienta"
 szczegoly_seansu_tekst = "Nie wybrano seansu"
 
-# -------------------------- ZAKŁADKA KIN -------------------------- #
+
+# -------------------------- FUNKCJE DO ZARZĄDZANIA KINAMI -------------------------- #
+
 
 def wyswietl_kino(kino):
     return f"{kino.nazwa} ({kino.siec})"
+
 
 def odswiez_liste_kin():
     current_selection = lista_kin.curselection()
     lista_kin.delete(0, tk.END)
 
     filtr = lista_rozwijalna_filtru_kin.get()
-    for indeks, kino in enumerate(kina):
+    for indeks, kino in enumerate(model.kina):
         if filtr == "Wszystkie" or kino.siec == filtr:
             lista_kin.insert(tk.END, f"{indeks + 1}. {wyswietl_kino(kino)} - {kino.lokalizacja}")
 
@@ -33,20 +36,22 @@ def odswiez_liste_kin():
         lista_kin.activate(current_selection[0])
         pokaz_szczegoly_kina(None)
 
+
 def odswiez_filtr_sieci_kin():
-    sieci = sorted({kino.siec for kino in kina})
+    sieci = sorted({kino.siec for kino in model.kina})
     lista_rozwijalna_filtru_kin['values'] = ["Wszystkie"] + sieci
     lista_rozwijalna_filtru_kin.set("Wszystkie")
+
 
 def pokaz_szczegoly_kina(event=None):
     global szczegoly_kina_tekst
     try:
         indeks = lista_kin.curselection()[0]
-        kino = kina[indeks]
+        kino = model.kina[indeks]
 
-        liczba_pracownikow = len([p for p in pracownicy if p.kino == wyswietl_kino(kino)])
-        liczba_klientow = len([k for k in klienci if k.kino == wyswietl_kino(kino)])
-        liczba_seansow = len([s for s in seanse if s.kino == wyswietl_kino(kino)])
+        liczba_pracownikow = len([p for p in model.pracownicy if p.kino == wyswietl_kino(kino)])
+        liczba_klientow = len([k for k in model.klienci if k.kino == wyswietl_kino(kino)])
+        liczba_seansow = len([s for s in model.seanse if s.kino == wyswietl_kino(kino)])
 
         szczegoly = (
             f"Nazwa: {kino.nazwa}\n"
@@ -71,23 +76,23 @@ def aktualizuj_kino(indeks):
     lokalizacja = pole_kino_lokalizacja.get()
 
     if siec and nazwa and lokalizacja:
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "warszawa":
             messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
             return
 
-        stara_nazwa = wyswietl_kino(kina[indeks])
-        kina[indeks].aktualizuj(siec, nazwa, lokalizacja)
-        nowa_nazwa = wyswietl_kino(kina[indeks])
+        stara_nazwa = wyswietl_kino(model.kina[indeks])
+        model.kina[indeks].aktualizuj(siec, nazwa, lokalizacja)
+        nowa_nazwa = wyswietl_kino(model.kina[indeks])
 
         if stara_nazwa != nowa_nazwa:
-            for pracownik in pracownicy:
+            for pracownik in model.pracownicy:
                 if pracownik.kino == stara_nazwa:
                     pracownik.kino = nowa_nazwa
-            for klient in klienci:
+            for klient in model.klienci:
                 if klient.kino == stara_nazwa:
                     klient.kino = nowa_nazwa
-            for seans in seanse:
+            for seans in model.seanse:
                 if seans.kino == stara_nazwa:
                     seans.kino = nowa_nazwa
 
@@ -102,10 +107,11 @@ def aktualizuj_kino(indeks):
     else:
         messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla kina (Sieć, Nazwa, Lokalizacja).")
 
+
 def edytuj_kino():
     try:
         indeks = lista_kin.curselection()[0]
-        wybrane_kino = kina[indeks]
+        wybrane_kino = model.kina[indeks]
         pole_kino_siec.delete(0, tk.END)
         pole_kino_siec.insert(0, wybrane_kino.siec)
         pole_kino_nazwa.delete(0, tk.END)
@@ -117,11 +123,10 @@ def edytuj_kino():
         messagebox.showerror("Błąd", "Nie wybrano kina do edycji.")
 
 
-
 def usun_kino():
     try:
         indeks = lista_kin.curselection()[0]
-        del kina[indeks]
+        del model.kina[indeks]
         odswiez_liste_kin()
         odswiez_listy_rozwijalne_kin()
         odswiez_filtr_sieci_kin()
@@ -130,18 +135,17 @@ def usun_kino():
         messagebox.showerror("Błąd", "Nie wybrano kina do usunięcia.")
 
 
-
 def dodaj_kino():
     siec = pole_kino_siec.get()
     nazwa = pole_kino_nazwa.get()
     lokalizacja = pole_kino_lokalizacja.get()
     if siec and nazwa and lokalizacja:
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "warszawa":
             messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
             return
-        nowe_kino = Kino(siec, nazwa, lokalizacja)
-        kina.append(nowe_kino)
+        nowe_kino = model.Kino(siec, nazwa, lokalizacja)
+        model.kina.append(nowe_kino)
         globalna_aktualizacja()
         pole_kino_siec.delete(0, tk.END)
         pole_kino_nazwa.delete(0, tk.END)
@@ -151,18 +155,18 @@ def dodaj_kino():
         messagebox.showerror("Błąd", "Wypełnij wszystkie pola dla kina (Sieć, Nazwa, Lokalizacja).")
 
 
+# -------------------------- FUNKCJE DO ZARZĄDZANIA SEANSAMI -------------------------- #
 
-# -------------------------- ZAKŁADKA SEANSE -------------------------- #
 
 def odswiez_liste_seansow():
     lista_seansow.delete(0, tk.END)
     wybrane_kino = lista_rozwijalna_seans_kino.get()
 
-    filtrowane_seanse = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+    filtrowane_seanse = [s for s in model.seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
 
     for indeks, seans in enumerate(filtrowane_seanse):
         kino_seansu = None
-        for k in kina:
+        for k in model.kina:
             if wyswietl_kino(k) == seans.kino:
                 kino_seansu = k
                 break
@@ -178,7 +182,7 @@ def odswiez_liste_seansow():
 
 
 def aktualizuj_seanse_po_zmianie_kina(stara_nazwa, nowa_nazwa):
-    for seans in seanse:
+    for seans in model.seanse:
         if seans.kino == stara_nazwa:
             seans.kino = nowa_nazwa
     globalna_aktualizacja()
@@ -192,11 +196,11 @@ def dodaj_seans():
     kino_wybrane = lista_rozwijalna_seans_kino.get()
 
     if tytul and data and godzina and czas_trwania and kino_wybrane and kino_wybrane != "Wybierz kino":
-        if not sprawdz_format_daty(data):
+        if not controller.sprawdz_format_daty(data):
             messagebox.showerror("Błąd", "Podaj datę w formacie DD.MM.RRRR (np. 31.12.2023)")
             return
 
-        if not sprawdz_format_godziny(godzina):
+        if not controller.sprawdz_format_godziny(godzina):
             messagebox.showerror("Błąd", "Podaj godzinę w formacie HH:MM (np. 14:30)")
             return
 
@@ -208,8 +212,8 @@ def dodaj_seans():
             messagebox.showerror("Błąd", "Czas trwania seansu musi być liczbą całkowitą większą od 0.")
             return
 
-        nowy_seans = Seans(tytul, data, godzina, czas_trwania, kino_wybrane)
-        seanse.append(nowy_seans)
+        nowy_seans = model.Seans(tytul, data, godzina, czas_trwania, kino_wybrane)
+        model.seanse.append(nowy_seans)
         globalna_aktualizacja()
         pole_seans_tytul.delete(0, tk.END)
         pole_seans_data.delete(0, tk.END)
@@ -222,10 +226,10 @@ def dodaj_seans():
 def usun_seans():
     try:
         wybrane_kino = lista_rozwijalna_seans_kino.get()
-        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        filtrowani = [s for s in model.seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
         indeks = lista_seansow.curselection()[0]
         seans = filtrowani[indeks]
-        seanse.remove(seans)
+        model.seanse.remove(seans)
         odswiez_liste_seansow()
         aktualizuj_liste_seansow_na_mapie()
         globalna_aktualizacja()
@@ -236,7 +240,7 @@ def usun_seans():
 def edytuj_seans():
     try:
         wybrane_kino = lista_rozwijalna_seans_kino.get()
-        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        filtrowani = [s for s in model.seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
         indeks = lista_seansow.curselection()[0]
         seans = filtrowani[indeks]
 
@@ -263,11 +267,11 @@ def aktualizuj_seans(seans):
     kino_wybrane = lista_rozwijalna_seans_kino.get()
 
     if tytul and data and godzina and czas_trwania and kino_wybrane:
-        if not sprawdz_format_daty(data):
+        if not controller.sprawdz_format_daty(data):
             messagebox.showerror("Błąd", "Podaj datę w formacie DD.MM.RRRR (np. 31.12.2023)")
             return
 
-        if not sprawdz_format_godziny(godzina):
+        if not controller.sprawdz_format_godziny(godzina):
             messagebox.showerror("Błąd", "Podaj godzinę w formacie HH:MM (np. 14:30)")
             return
 
@@ -300,12 +304,12 @@ def pokaz_szczegoly_seansu(event=None):
     global szczegoly_seansu_tekst
     try:
         wybrane_kino = lista_rozwijalna_seans_kino.get()
-        filtrowani = [s for s in seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
+        filtrowani = [s for s in model.seanse if wybrane_kino == "Wszystkie" or s.kino == wybrane_kino]
         indeks = lista_seansow.curselection()[0]
         seans = filtrowani[indeks]
 
         kino_seansu = None
-        for k in kina:
+        for k in model.kina:
             if wyswietl_kino(k) == seans.kino:
                 kino_seansu = k
                 break
@@ -333,17 +337,18 @@ def pokaz_szczegoly_seansu(event=None):
         informacje_o_wybranym_seansie.config(text="Nie wybrano seansu.")
 
 
-# -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
+# -------------------------- FUNKCJE DO ZARZĄDZANIA PRACOWNIKAMI -------------------------- #
+
 
 def odswiez_liste_pracownikow():
     lista_pracownikow.delete(0, tk.END)
     wybrane_kino = lista_rozwijalna_pracownik_kino.get()
 
     if wybrane_kino == "Wszystkie" or not wybrane_kino:
-        for indeks, pracownik in enumerate(pracownicy):
+        for indeks, pracownik in enumerate(model.pracownicy):
             lista_pracownikow.insert(tk.END, f"{indeks + 1}. {pracownik.imie} {pracownik.nazwisko} - {pracownik.kino}")
     else:
-        for indeks, pracownik in enumerate([p for p in pracownicy if p.kino == wybrane_kino]):
+        for indeks, pracownik in enumerate([p for p in model.pracownicy if p.kino == wybrane_kino]):
             lista_pracownikow.insert(tk.END, f"{indeks + 1}. {pracownik.imie} {pracownik.nazwisko} - {pracownik.kino}")
 
 #    print("\nFunkcja odswiez_liste_pracownikow: Lista została zaktualizowana.")
@@ -355,12 +360,12 @@ def dodaj_pracownika():
     lokalizacja = pole_pracownik_lokalizacja.get()
     kino_wybrane = lista_rozwijalna_pracownik_kino.get()
     if imie and nazwisko and lokalizacja and kino_wybrane and kino_wybrane != "Wybierz kino":
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
             messagebox.showerror("Błąd", "Błędna lokalizacja, wprowadź poprawną lokalizację.")
             return
-        nowy_pracownik = Pracownik(imie, nazwisko, kino_wybrane, lokalizacja)
-        pracownicy.append(nowy_pracownik)
+        nowy_pracownik = model.Pracownik(imie, nazwisko, kino_wybrane, lokalizacja)
+        model.pracownicy.append(nowy_pracownik)
         globalna_aktualizacja()
         pole_pracownik_imie.delete(0, tk.END)
         pole_pracownik_nazwisko.delete(0, tk.END)
@@ -375,11 +380,11 @@ def usun_pracownika():
         wybrane_kino = lista_rozwijalna_pracownik_kino.get()
 
         if wybrane_kino == "Wszystkie":
-            pracownik = pracownicy[indeks]
+            pracownik = model.pracownicy[indeks]
         else:
-            pracownik = [p for p in pracownicy if p.kino == wybrane_kino][indeks]
+            pracownik = [p for p in model.pracownicy if p.kino == wybrane_kino][indeks]
 
-        pracownicy.remove(pracownik)
+        model.pracownicy.remove(pracownik)
         odswiez_liste_pracownikow()
         globalna_aktualizacja()
     except IndexError:
@@ -389,7 +394,7 @@ def usun_pracownika():
 def edytuj_pracownika():
     try:
         wybrane_kino = lista_rozwijalna_pracownik_kino.get()
-        filtrowani = [p for p in pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
+        filtrowani = [p for p in model.pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
         indeks = lista_pracownikow.curselection()[0]
         pracownik = filtrowani[indeks]
         pole_pracownik_imie.delete(0, tk.END)
@@ -411,7 +416,7 @@ def aktualizuj_pracownika(pracownik):
     kino_wybrane = lista_rozwijalna_pracownik_kino.get()
 
     if imie and nazwisko and lokalizacja and kino_wybrane:
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
             messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
             return
@@ -435,10 +440,10 @@ def pokaz_szczegoly_pracownika(event=None):
     global szczegoly_pracownika_tekst
     try:
         indeks = lista_pracownikow.curselection()[0]
-        pracownik = pracownicy[indeks]
+        pracownik = model.pracownicy[indeks]
 
         kino_pracownika = None
-        for k in kina:
+        for k in model.kina:
             if wyswietl_kino(k) == pracownik.kino:
                 kino_pracownika = k
                 break
@@ -472,15 +477,16 @@ def pokaz_szczegoly_pracownika(event=None):
 
 # -------------------------- ZAKŁADKA KLIENCI -------------------------- #
 
+
 def odswiez_liste_klientow():
     lista_klientow.delete(0, tk.END)
     wybrane_kino = lista_rozwijalna_klient_kino.get()
 
     if wybrane_kino == "Wszystkie" or not wybrane_kino:
-        for indeks, klient in enumerate(klienci):
+        for indeks, klient in enumerate(model.klienci):
             lista_klientow.insert(tk.END, f"{indeks + 1}. {klient.imie} {klient.nazwisko} - {klient.kino}")
     else:
-        for indeks, klient in enumerate([k for k in klienci if k.kino == wybrane_kino]):
+        for indeks, klient in enumerate([k for k in model.klienci if k.kino == wybrane_kino]):
             lista_klientow.insert(tk.END, f"{indeks + 1}. {klient.imie} {klient.nazwisko} - {klient.kino}")
 
 #    print("\nFunkcja odswiez_liste_klientow: Lista została zaktualizowana.")
@@ -492,12 +498,12 @@ def dodaj_klienta():
     lokalizacja = pole_klient_lokalizacja.get()
     kino_wybrane = lista_rozwijalna_klient_kino.get()
     if imie and nazwisko and lokalizacja and kino_wybrane and kino_wybrane != "Wybierz kino":
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
             messagebox.showerror("Błąd", "Błędna lokalizacja, wprowadź poprawną lokalizację.")
             return
-        nowy_klient = Klient(imie, nazwisko, kino_wybrane, lokalizacja)
-        klienci.append(nowy_klient)
+        nowy_klient = model.Klient(imie, nazwisko, kino_wybrane, lokalizacja)
+        model.klienci.append(nowy_klient)
         globalna_aktualizacja()
         pole_klient_imie.delete(0, tk.END)
         pole_klient_nazwisko.delete(0, tk.END)
@@ -512,11 +518,11 @@ def usun_klienta():
         wybrane_kino = lista_rozwijalna_klient_kino.get()
 
         if wybrane_kino == "Wszystkie":
-            klient = klienci[indeks]
+            klient = model.klienci[indeks]
         else:
-            klient = [k for k in klienci if k.kino == wybrane_kino][indeks]
+            klient = [k for k in model.klienci if k.kino == wybrane_kino][indeks]
 
-        klienci.remove(klient)
+        model.klienci.remove(klient)
         odswiez_liste_klientow()
         globalna_aktualizacja()
     except IndexError:
@@ -526,7 +532,7 @@ def usun_klienta():
 def edytuj_klienta():
     try:
         wybrane_kino = lista_rozwijalna_klient_kino.get()
-        filtrowani = [k for k in klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
+        filtrowani = [k for k in model.klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
         indeks = lista_klientow.curselection()[0]
         klient = filtrowani[indeks]
         pole_klient_imie.delete(0, tk.END)
@@ -548,7 +554,7 @@ def aktualizuj_klienta(klient):
     kino_wybrane = lista_rozwijalna_klient_kino.get()
 
     if imie and nazwisko and lokalizacja and kino_wybrane:
-        wsp = pobierz_wspolrzedne(lokalizacja)
+        wsp = model.pobierz_wspolrzedne(lokalizacja)
         if wsp == (52.23, 21.00) and lokalizacja.strip().lower() != "Warszawa":
             messagebox.showerror("Błąd", "Podano błędną lokalizację, wprowadź prawidłową lokalizację.")
             return
@@ -572,10 +578,10 @@ def pokaz_szczegoly_klienta(event=None):
     global szczegoly_klienta_tekst
     try:
         indeks = lista_klientow.curselection()[0]
-        klient = klienci[indeks]
+        klient = model.klienci[indeks]
 
         kino_klienta = None
-        for k in kina:
+        for k in model.kina:
             if wyswietl_kino(k) == klient.kino:
                 kino_klienta = k
                 break
@@ -607,7 +613,7 @@ def pokaz_szczegoly_klienta(event=None):
         informacje_o_wybranym_kliencie.config(text="Nie wybrano klienta.")
 
 
-# -------------------------- ZAKŁADKA MAPY -------------------------- #
+# -------------------------- FUNKCJE DO ZARZĄDZANIA MAPA -------------------------- #
 
 
 def odswiez_mape():
@@ -623,7 +629,7 @@ def wyczysc_mape():
 def pokaz_wszystkie_kina_na_mapie():
     widget_mapy.set_zoom(6)
     wyczysc_mape()
-    for kino in kina:
+    for kino in model.kina:
         widget_mapy.set_marker(kino.wspolrzedne[0], kino.wspolrzedne[1], text=f"Kino: {wyswietl_kino(kino)}", text_color="black")
 
 
@@ -637,7 +643,7 @@ def pokaz_pracownikow_na_mapie():
     widget_mapy.set_zoom(6)
     wyczysc_mape()
 
-    filtrowani = [p for p in pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
+    filtrowani = [p for p in model.pracownicy if wybrane_kino == "Wszystkie" or p.kino == wybrane_kino]
 
     if not filtrowani:
         if wybrane_kino == "Wszystkie":
@@ -667,7 +673,7 @@ def pokaz_klientow_na_mapie():
     widget_mapy.set_zoom(6)
     wyczysc_mape()
 
-    filtrowani = [k for k in klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
+    filtrowani = [k for k in model.klienci if wybrane_kino == "Wszystkie" or k.kino == wybrane_kino]
 
     if not filtrowani:
         if wybrane_kino == "Wszystkie":
@@ -697,7 +703,7 @@ def pokaz_kin_po_sieci():
     widget_mapy.set_zoom(6)
     wyczysc_mape()
 
-    filtrowane_kina = [k for k in kina if wybrana_siec == "Wszystkie" or k.siec == wybrana_siec]
+    filtrowane_kina = [k for k in model.kina if wybrana_siec == "Wszystkie" or k.siec == wybrana_siec]
 
     if not filtrowane_kina:
         if wybrana_siec == "Wszystkie":
@@ -725,7 +731,7 @@ def pokaz_kina_dla_seansu():
     widget_mapy.set_zoom(6)
     wyczysc_mape()
 
-    znalezione_seanse = [s for s in seanse if s.tytul == wybrany_seans]
+    znalezione_seanse = [s for s in model.seanse if s.tytul == wybrany_seans]
 
     if not znalezione_seanse:
         messagebox.showinfo("Informacja", f"Brak kin z seansem '{wybrany_seans}' w systemie.")
@@ -733,7 +739,7 @@ def pokaz_kina_dla_seansu():
 
     znalezione_kina = []
     for seans in znalezione_seanse:
-        for kino in kina:
+        for kino in model.kina:
             if wyswietl_kino(kino) == seans.kino:
                 znalezione_kina.append(kino)
                 widget_mapy.set_marker(
@@ -752,22 +758,22 @@ def pokaz_kina_dla_seansu():
 def aktualizuj_kino_na_mapie_po_sieci():
     wybrana_siec = lista_rozwijalna_siec_mapy.get()
     if wybrana_siec == "Wszystkie":
-        nazwy_kin = [wyswietl_kino(kino) for kino in kina]
+        nazwy_kin = [wyswietl_kino(kino) for kino in model.kina]
     else:
-        nazwy_kin = [wyswietl_kino(kino) for kino in kina if kino.siec == wybrana_siec]
+        nazwy_kin = [wyswietl_kino(kino) for kino in model.kina if kino.siec == wybrana_siec]
     lista_rozwijalna_kino_mapy['values'] = ["Wszystkie"] + nazwy_kin
     lista_rozwijalna_kino_mapy.set("Wszystkie")
 
 
 def aktualizuj_liste_seansow_na_mapie():
-    unikalne_tytuly = sorted({s.tytul for s in seanse})
+    unikalne_tytuly = sorted({s.tytul for s in model.seanse})
     lista_seansow_mapy = ["Nie wybrano seansu"] + unikalne_tytuly
     lista_rozwijalna_seans_mapy['values'] = lista_seansow_mapy
     lista_rozwijalna_seans_mapy.set("Nie wybrano seansu")
 
 
 def odswiez_liste_sieci_na_mapie():
-    sieci = sorted({kino.siec for kino in kina})
+    sieci = sorted({kino.siec for kino in model.kina})
     lista_rozwijalna_siec_mapy['values'] = ["Wszystkie"] + sieci
     lista_rozwijalna_siec_mapy.set("Wszystkie")
 
@@ -779,7 +785,7 @@ def pokaz_szczegoly_kina_na_mapie(event=None):
         return
 
     kino_wybrane = None
-    for kino in kina:
+    for kino in model.kina:
         if wyswietl_kino(kino) == selected:
             kino_wybrane = kino
             break
@@ -798,9 +804,9 @@ def pokaz_szczegoly_kina_na_mapie(event=None):
         text_color="black"
     )
 
-    liczba_pracownikow = len([p for p in pracownicy if p.kino == wyswietl_kino(kino_wybrane)])
-    liczba_klientow = len([k for k in klienci if k.kino == wyswietl_kino(kino_wybrane)])
-    liczba_seansow = len([s for s in seanse if s.kino == wyswietl_kino(kino_wybrane)])
+    liczba_pracownikow = len([p for p in model.pracownicy if p.kino == wyswietl_kino(kino_wybrane)])
+    liczba_klientow = len([k for k in model.klienci if k.kino == wyswietl_kino(kino_wybrane)])
+    liczba_seansow = len([s for s in model.seanse if s.kino == wyswietl_kino(kino_wybrane)])
 
     szczegoly = (f"Nazwa: {kino_wybrane.nazwa}\n"
                  f"Sieć: {kino_wybrane.siec}\n"
@@ -814,7 +820,6 @@ def pokaz_szczegoly_kina_na_mapie(event=None):
     messagebox.showinfo(tytul, szczegoly)
 
 
-
 def podpowiedzi_przyciskow_na_mapie(widget, text):
     tooltip = tk.Toplevel(widget)
     tooltip.wm_overrideredirect(True)
@@ -822,25 +827,27 @@ def podpowiedzi_przyciskow_na_mapie(widget, text):
     label = tk.Label(tooltip, text=text, background="#ffffe0", relief="solid", borderwidth=1)
     label.pack()
 
-    def enter(event):
+    def po_najechaniu_kursorem(event):
         x, y, _, _ = widget.bbox("insert")
         x += widget.winfo_rootx() + 25
         y += widget.winfo_rooty() + 25
         tooltip.wm_geometry(f"+{x}+{y}")
         tooltip.deiconify()
 
-    def leave(event):
+    def po_zabraniu_kursora(event):
         tooltip.withdraw()
 
-    widget.bind("<Enter>", enter)
-    widget.bind("<Leave>", leave)
+    widget.bind("<Enter>", po_najechaniu_kursorem)
+    widget.bind("<Leave>", po_zabraniu_kursora)
     tooltip.withdraw()
     return tooltip
 
+
 # -------------------------- GLOBALNE AKTUALIZACJE -------------------------- #
 
+
 def odswiez_listy_rozwijalne_kin():
-    nazwy_kin = [wyswietl_kino(kino) for kino in kina]
+    nazwy_kin = [wyswietl_kino(kino) for kino in model.kina]
     lista_rozwijalna_pracownik_kino['values'] = ["Wszystkie"] + nazwy_kin
     lista_rozwijalna_pracownik_kino.set("Wszystkie")
     lista_rozwijalna_klient_kino['values'] = ["Wszystkie"] + nazwy_kin
@@ -851,6 +858,7 @@ def odswiez_listy_rozwijalne_kin():
     aktualizuj_kino_na_mapie_po_sieci()
     aktualizuj_liste_seansow_na_mapie()
     odswiez_filtr_sieci_kin()
+
 
 def globalna_aktualizacja():
     # Zapamiętaj aktualny stan interfejsu
@@ -906,9 +914,10 @@ def globalna_aktualizacja():
     root.update()
 
 
+# -------------------------- KONFIGURACJA GŁÓWNEGO INTERFEJSU -------------------------- #
 
-#-------------------------- IKONA APLIKACJI --------------------------#
 
+# --- Ikona i style aplikacji --- #
 
 def pobierz_sciezke_ikony():
     """ Zwraca ścieżkę do tymczasowej ikony (działa zarówno w .exe, jak i w terminalu) """
@@ -925,7 +934,7 @@ def pobierz_sciezke_ikony():
             with open(sciezka_ikony , "wb") as plik_ikony:
                 plik_ikony.write(ikona_w_bajtach)
         except Exception as e:
-            print(f"Błąd zapisu ikony: {e}")
+            print(f"\nBłąd zapisu ikony: {e}")
             return None
 
     return sciezka_ikony
@@ -935,7 +944,6 @@ root = tk.Tk()
 root.title("System do zarządzania siecią kin")
 root.geometry("1200x800")
 
-# Załadowanie ikony
 myappid = u'System.do.zarzadzania.siecia.kin'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 sciezka_ikony  = pobierz_sciezke_ikony()
@@ -962,9 +970,7 @@ style.configure("Group.TLabelframe.Label", background="lightblue", anchor="cente
 zakladki = ttk.Notebook(root)
 zakladki.pack(fill="both", expand=True)
 
-
-# -------------------------- ZAKŁADKA KIN -------------------------- #
-
+# --- Zakładka kina --- #
 
 zakladka_kin = ttk.Frame(zakladki)
 zakladki.add(zakladka_kin, text="Kina")
@@ -1019,9 +1025,7 @@ pole_kino_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_kina = ttk.Button(ramka_formularza_kin, text="Dodaj", command=dodaj_kino)
 przycisk_dodaj_kina.grid(row=4, column=1, columnspan=2, pady=10)
 
-
-# -------------------------- ZAKŁADKA SEANSE -------------------------- #
-
+# --- Zakładka seanse --- #
 
 zakladka_seanse = ttk.Frame(zakladki)
 zakladki.add(zakladka_seanse, text="Seanse")
@@ -1080,9 +1084,7 @@ pole_seans_czas_trwania.grid(row=4, column=1, padx=2, pady=5)
 przycisk_dodaj_seans = ttk.Button(ramka_formularza_seans, text="Dodaj", command=dodaj_seans)
 przycisk_dodaj_seans.grid(row=5, column=1, columnspan=2, pady=10)
 
-
-# -------------------------- ZAKŁADKA PRACOWNICY -------------------------- #
-
+# --- Zakładka pracownicy --- #
 
 zakladka_pracownicy = ttk.Frame(zakladki)
 zakladki.add(zakladka_pracownicy, text="Pracownicy")
@@ -1138,9 +1140,7 @@ pole_pracownik_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_pracownik = ttk.Button(ramka_formularza_pracownik, text="Dodaj", command=dodaj_pracownika)
 przycisk_dodaj_pracownik.grid(row=4, column=1, columnspan=2, pady=10)
 
-
-# -------------------------- ZAKŁADKA KLIENCI -------------------------- #
-
+# --- Zakładka klienci --- #
 
 zakladka_klienci = ttk.Frame(zakladki)
 zakladki.add(zakladka_klienci, text="Klienci")
@@ -1195,9 +1195,7 @@ pole_klient_lokalizacja.grid(row=3, column=1, padx=2, pady=5)
 przycisk_dodaj_klient = ttk.Button(ramka_formularza_klient, text="Dodaj", command=dodaj_klienta)
 przycisk_dodaj_klient.grid(row=4, column=1, columnspan=2, pady=10)
 
-
-# -------------------------- ZAKŁADKA MAPY -------------------------- #
-
+# --- Zakładka mapy --- #
 
 zakladka_mapy = ttk.Frame(zakladki)
 zakladki.add(zakladka_mapy, text="Mapa")
@@ -1276,4 +1274,3 @@ podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_pracownikow, "Wyświetla pracowni
 przycisk_pokaz_klientow = ttk.Button(ramka_osoby, text="Pokaż klientów", command=pokaz_klientow_na_mapie, style="Map.TButton")
 przycisk_pokaz_klientow.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 podpowiedzi_przyciskow_na_mapie(przycisk_pokaz_klientow, "Wyświetla klientów wybranego kina/kin na mapie")
-

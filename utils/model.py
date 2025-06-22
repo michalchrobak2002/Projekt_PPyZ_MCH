@@ -1,4 +1,35 @@
-from utils.controller import *
+import os
+import requests
+from bs4 import BeautifulSoup
+
+folder_nazwa = "Dane_aplikacji_System_do_zarzadzania_siecia_kin"
+folder_danych = ""
+plik_kin = os.path.join(folder_danych, "Kina.json")
+plik_seansow = os.path.join(folder_danych, "Seanse.json")
+plik_pracownikow = os.path.join(folder_danych, "Pracownicy.json")
+plik_klientow = os.path.join(folder_danych, "Klienci.json")
+
+
+def pobierz_wspolrzedne(lokalizacja, czy_jest_internet=True):
+    try:
+        if not czy_jest_internet:
+            return (52.23, 21.00)
+
+        url = "https://pl.wikipedia.org/wiki/" + lokalizacja.replace(" ", "_")
+        odpowiedz = requests.get(url, timeout=10)
+        if odpowiedz.status_code == 200:
+            soup = BeautifulSoup(odpowiedz.content, "html.parser")
+            tagi_szerokosci = soup.select(".latitude")
+            tagi_dlugosci = soup.select(".longitude")
+            if len(tagi_szerokosci) >= 2 and len(tagi_dlugosci) >= 2:
+                szerokosc = float(tagi_szerokosci[1].text.replace(",", "."))
+                dlugosc = float(tagi_dlugosci[1].text.replace(",", "."))
+                return (szerokosc, dlugosc)
+        return (52.23, 21.00)
+    except Exception as e:
+        print(f"\nBłąd pobierania współrzędnych dla {lokalizacja}: {e}")
+        return (52.23, 21.00)
+
 
 class Kino:
     def __init__(self, siec, nazwa, lokalizacja, czy_pobrac_wspolrzedne=True):
@@ -212,4 +243,3 @@ kina = []
 seanse = []
 pracownicy = []
 klienci = []
-
