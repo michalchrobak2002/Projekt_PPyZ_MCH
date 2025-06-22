@@ -8,6 +8,22 @@ root = tk.Tk()
 root.title("System do zarządzania siecią kin")
 root.geometry("1200x800")
 
+style = ttk.Style()
+style.theme_use('clam')
+style.configure("TFrame", background="lightblue")
+style.configure("TLabel", background="lightblue", foreground="black")
+style.configure("TButton", background="skyblue", foreground="black")
+style.configure("TNotebook", background="skyblue")
+style.configure("TNotebook.Tab", background="lightblue", foreground="black", padding=[5, 2])
+style.map("TNotebook.Tab", background=[("selected", "skyblue")])
+# style.configure("TEntry", fieldbackground="lightblue", foreground="black")
+style.configure("TLabelframe", background="lightblue")
+style.configure("TLabelframe.Label", background="lightblue", foreground="black")
+style.configure("Map.TButton", background="skyblue", foreground="black", padding=5)
+style.configure("Group.TLabelframe", background="lightblue", padding=0)
+style.configure("Group.TLabelframe.Label", background="lightblue", anchor="center", padding=0)
+
+
 zakladki = ttk.Notebook(root)
 zakladki.pack(fill="both", expand=True)
 
