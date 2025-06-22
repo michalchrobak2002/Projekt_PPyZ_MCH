@@ -3,7 +3,6 @@ import os
 
 from utils import model
 
-
 def ustaw_folder_danych(katalog_bazowy):
     model.folder_danych = os.path.join(katalog_bazowy, model.folder_nazwa)
     os.makedirs(model.folder_danych, exist_ok=True)
@@ -93,3 +92,20 @@ def sprawdz_format_godziny(godzina):
         return 0 <= godzina <= 23 and 0 <= minuty <= 59
     except (ValueError, AttributeError):
         return False
+
+def aktualizuj_wspolrzedne():
+
+    for kino in model.kina:
+        nowe_wspolrzedne = model.pobierz_wspolrzedne(kino.lokalizacja)
+        if nowe_wspolrzedne != (52.23, 21.00):
+            kino.wspolrzedne = nowe_wspolrzedne
+
+    for pracownik in model.pracownicy:
+        nowe_wspolrzedne = model.pobierz_wspolrzedne(pracownik.lokalizacja)
+        if nowe_wspolrzedne != (52.23, 21.00):
+            pracownik.wspolrzedne = nowe_wspolrzedne
+
+    for klient in model.klienci:
+        nowe_wspolrzedne = model.pobierz_wspolrzedne(klient.lokalizacja)
+        if nowe_wspolrzedne != (52.23, 21.00):
+            klient.wspolrzedne = nowe_wspolrzedne
