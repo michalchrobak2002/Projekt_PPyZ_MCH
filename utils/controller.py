@@ -3,6 +3,7 @@ import os
 
 from utils import model
 
+
 def ustaw_folder_danych(katalog_bazowy):
     model.folder_danych = os.path.join(katalog_bazowy, model.folder_nazwa)
     os.makedirs(model.folder_danych, exist_ok=True)
@@ -92,6 +93,7 @@ def sprawdz_format_godziny(godzina):
         return 0 <= godzina <= 23 and 0 <= minuty <= 59
     except (ValueError, AttributeError):
         return False
+
 
 def aktualizuj_wspolrzedne():
 

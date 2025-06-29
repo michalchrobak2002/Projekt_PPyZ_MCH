@@ -5,19 +5,23 @@ import ctypes
 import tempfile
 import os
 
-from utils import model
-from utils import controller
+from utils import model, controller
 
 
-szczegoly_kina_tekst = "Nie wybrano kina"
-szczegoly_pracownika_tekst = "Nie wybrano pracownika"
-szczegoly_klienta_tekst = "Nie wybrano klienta"
-szczegoly_seansu_tekst = "Nie wybrano seansu"
+szczegoly_kina_tekst = "Nie wybrano kina."
+szczegoly_pracownika_tekst = "Nie wybrano pracownika."
+szczegoly_klienta_tekst = "Nie wybrano klienta."
+szczegoly_seansu_tekst = "Nie wybrano seansu."
+
 
 # -------------------------- FUNKCJE DO OBSŁUGI POŁĄCZENIA Z INTERNETEM -------------------------- #
+
+
 def wyswietl_brak_internetu():
     root.after(0, lambda: messagebox.showwarning("Brak połączenia z Internetem",
                                                  "Utracono połączenie z Internetem. Proszę połączyć się z siecią, aby korzystać z pełnej funkcjonalności aplikacji"))
+
+
 def podlaczono_internet():
     root.after(0, lambda: messagebox.showinfo("Połączono z Internetem",
                                               "Internet został ponownie przywrócony. Wszystkie informacje zostały zaktualizowane i odświeżone."))
@@ -25,11 +29,14 @@ def podlaczono_internet():
     root.after(10, aktualizuj_wspolrzedne_po_polaczeniu)
     root.after(10, odswiez_mape)
 
+
 def aktualizuj_wspolrzedne_po_polaczeniu():
     controller.aktualizuj_wspolrzedne()
     globalna_aktualizacja()
     if zakladki.tab(zakladki.select(), "text") == "Mapa":
         odswiez_mape()
+
+
 # -------------------------- FUNKCJE DO ZARZĄDZANIA KINAMI -------------------------- #
 
 
@@ -50,6 +57,8 @@ def odswiez_liste_kin():
         lista_kin.selection_set(current_selection[0])
         lista_kin.activate(current_selection[0])
         pokaz_szczegoly_kina(None)
+
+#    print("\nFunkcja odswiez_liste_kin: Lista została zaktualizowana.")
 
 
 def odswiez_filtr_sieci_kin():
@@ -77,6 +86,7 @@ def pokaz_szczegoly_kina(event=None):
             f"Liczba klientów: {liczba_klientow}\n"
             f"Liczba seansów: {liczba_seansow}"
         )
+
         szczegoly_kina_tekst = szczegoly
         informacje_o_wybranym_kinie.config(text=szczegoly_kina_tekst)
         informacje_o_wybranym_kinie.update_idletasks()
@@ -874,6 +884,7 @@ def odswiez_listy_rozwijalne_kin():
     aktualizuj_liste_seansow_na_mapie()
     odswiez_filtr_sieci_kin()
 
+
 def aktualizuj_po_zmianie_zakladki(event):
     id_aktualnej_zakladki = zakladki.select()
     nazwa_zakladki = zakladki.tab(id_aktualnej_zakladki, "text")
@@ -895,6 +906,7 @@ def aktualizuj_po_zmianie_zakladki(event):
             messagebox.showwarning("Brak połączenia z Internetem", "Funkcje mapy wymagają połączenia z Internetem. Proszę połączyć się z siecią.")
         else:
             odswiez_mape()
+
 
 def globalna_aktualizacja():
     # Zapamiętaj aktualny stan interfejsu
@@ -984,7 +996,7 @@ myappid = u'System.do.zarzadzania.siecia.kin'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 sciezka_ikony  = pobierz_sciezke_ikony()
 if sciezka_ikony :
-    root.iconbitmap(sciezka_ikony )
+    root.iconbitmap(sciezka_ikony)
 else:
     print("\nNie udało się załadować ikony")
 

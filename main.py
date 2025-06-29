@@ -7,6 +7,7 @@ import requests
 
 from utils import gui, controller, model
 
+
 def sprawdz_polaczenie_internetowe():
     """ Sprawdza połączenie internetowe i aktualizuje globalny stan """
     try:
@@ -24,6 +25,7 @@ def sprawdz_polaczenie_internetowe():
         elif not model.czy_jest_internet:
             gui.wyswietl_brak_internetu()
 
+
 def uruchom_monitorowanie_internetu():
     """ Uruchamia w tle monitorowanie połączenia internetowego """
     def monitor():
@@ -32,6 +34,7 @@ def uruchom_monitorowanie_internetu():
             time.sleep(5)
 
     threading.Thread(target=monitor, daemon=True).start()
+
 
 @atexit.register
 def cleanup():
@@ -47,8 +50,8 @@ def zamykanie():
     gui.root.destroy()
 
 
-
 uruchom_monitorowanie_internetu()
+
 if getattr(sys, 'frozen', False):
     katalog_bazowy = os.path.dirname(sys.executable)
 else:
@@ -64,6 +67,5 @@ gui.odswiez_liste_pracownikow()
 gui.odswiez_liste_klientow()
 gui.odswiez_liste_seansow()
 gui.odswiez_listy_rozwijalne_kin()
-gui.odswiez_filtr_sieci_kin()
 
 gui.root.mainloop()
