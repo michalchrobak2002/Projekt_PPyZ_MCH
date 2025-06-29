@@ -2,6 +2,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
+
 poprzedni_stan_internetu = True
 czy_jest_internet = True
 
@@ -70,14 +71,14 @@ class Kino:
             return obiekt
 
         wsp = d.get("wspolrzedne")
-        wspolrzedne_z_pliku  = None
+        wspolrzedne_z_pliku = None
         if wsp and isinstance(wsp, (list, tuple)) and len(wsp) == 2:
             try:
-                wspolrzedne_z_pliku  = (float(wsp[0]), float(wsp[1]))
+                wspolrzedne_z_pliku = (float(wsp[0]), float(wsp[1]))
             except Exception:
-                wspolrzedne_z_pliku  = None
+                wspolrzedne_z_pliku = None
 
-        if wspolrzedne_z_pliku  and wspolrzedne_z_pliku  != domyslne_wspolrzedne:
+        if wspolrzedne_z_pliku and wspolrzedne_z_pliku != domyslne_wspolrzedne:
             obiekt = cls(d["siec"], d["nazwa"], lokalizacja, czy_pobrac_wspolrzedne=False)
             obiekt.wspolrzedne = wspolrzedne_z_pliku
             return obiekt
